@@ -1,0 +1,5 @@
+- rewrite depends on ParseTree which doesn't work with Ruby 1.9 and higher
+  - the recommended solution appears to be to use sourcify instead
+  - I'm not sure is rewrite is still being maintained, so we might have to
+    fork it if it needs changes
+  - I'm currently using  ruby 1.8.7 here to avoid this
