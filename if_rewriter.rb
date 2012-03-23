@@ -7,6 +7,7 @@ require 'parse_tree'
 require 'ruby2ruby'
 require 'aquarium'
 
+require 'my_if'
 require 'example_classes'
 require 'class_mirrorer'
 
@@ -63,7 +64,6 @@ def main
 
   # Aquarium changes the methods to advise them, so save them beforehand
   mirrored_methods = mirrorer.call to_intercept
-  #fizzbuzzer_instance_methods = instance_methods_of Fizzbuzzer
 
   # Some thoughts on interception
   # Removing method_options segfaults
@@ -81,7 +81,6 @@ def main
 
       key = ClassAndMethodName.new(obj.class, method_name)
       translated = mirrored_methods[key]
-
 
       # GOTCHA: SexpProcessor#process turns its argument into an empty array
       # We need to copy arrays before feeding it to this method if we want
