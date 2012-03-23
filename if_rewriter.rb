@@ -8,6 +8,14 @@ require 'ruby2ruby'
 require 'aquarium'
 
 require 'example_classes'
+require 'class_mirrorer'
+
+# Given an array of base classes, return a flat array of all their subclasses
+def subclasses_of(klasses)
+  klasses.map { |klass|
+    klass.descendants
+  }.flatten
+end
 
 # Patch in a way to get the descendants of a class
 class Class
@@ -46,27 +54,22 @@ def deep_copy_of_array(array)
   Marshal.load(Marshal.dump(array))
 end
 
-# Given an array of base classes, return a flat array of all their subclasses
-def subclasses_of(klasses)
-  klasses.map { |klass|
-    klass.descendants
-  }.flatten
-end
-
 def main
   include Aquarium::Aspects
   rails_classes = [ActiveRecord::Base, ApplicationController]
   to_intercept = subclasses_of rails_classes
   processor = SexpProcessor.new
+  mirrorer = new_class_mirrorer
 
   # Aquarium changes the methods to advise them, so save them beforehand
-  fizzbuzzer_instance_methods = instance_methods_of Fizzbuzzer
+  mirrored_methods = mirrorer.call to_intercept
+  #fizzbuzzer_instance_methods = instance_methods_of Fizzbuzzer
 
   # Some thoughts on interception
   # Removing method_options segfaults
   # Changing Fizzbuzzer to Object causes it to not intercept Fizzbuzzer methods
   # (so it's not covariant)
-  Aspect.new :around, :calls_to => :all_methods, :for_types => [Fizzbuzzer],
+  Aspect.new :around, :calls_to => :all_methods, :for_types => to_intercept,
       :method_options => :exclude_ancestor_methods do |join_point, obj, *args|
     begin
       p "Entering: #{join_point.target_type.name}##{join_point.method_name}: args = #{args.inspect}"
@@ -76,7 +79,8 @@ def main
       # Save the Aquarium-modified method, we'll need it later
       modified_method = ParseTree.translate(obj.class, method_name)
 
-      translated = fizzbuzzer_instance_methods[method_name]
+      key = ClassAndMethodName.new(obj.class, method_name)
+      translated = mirrored_methods[key]
 
 
       # GOTCHA: SexpProcessor#process turns its argument into an empty array
