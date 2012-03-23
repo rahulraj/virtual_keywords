@@ -1,6 +1,5 @@
 class Fizzbuzzer
   def fizzbuzz(n)
-    p n
     (1..n).map { |i|
       if i % 3 == 0 and i % 5 == 0
         "fizzbuzz"
@@ -12,5 +11,9 @@ class Fizzbuzzer
         i.to_s
       end
     }
+  end
+
+  def greet
+    puts 'hi there'
   end
 end
