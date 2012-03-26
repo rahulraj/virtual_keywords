@@ -8,6 +8,7 @@ require 'ruby2ruby'
 require 'aquarium'
 
 require 'my_if'
+require 'sexp_to_string'
 require 'example_classes'
 require 'class_mirrorer'
 
@@ -38,15 +39,6 @@ def instance_methods_of(klass)
   end
 
   methods
-end
-
-# Turn a sexp into a string of Ruby code
-def sexp_to_string(sexp)
-  unifier = Unifier.new
-  ruby2ruby = Ruby2Ruby.new
-  unified = unifier.process sexp
-  
-  ruby2ruby.process unified
 end
 
 # Deeply copy an array
@@ -124,6 +116,8 @@ def main
   puts greeter.greet
 end
 
+# Run main() only if if_rewriter is executed with the ruby command, not
+# imported. Like "if __name__ == '__main__': " in Python
 if __FILE__ == $0
   main()
 end
