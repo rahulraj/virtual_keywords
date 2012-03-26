@@ -8,6 +8,7 @@ require 'ruby2ruby'
 require 'aquarium'
 
 require 'my_if'
+require 'if_processor'
 require 'sexp_to_string'
 require 'example_classes'
 require 'class_mirrorer'
@@ -52,6 +53,7 @@ def main
   rails_classes = [ActiveRecord::Base, ApplicationController]
   to_intercept = subclasses_of rails_classes
   processor = SexpProcessor.new
+  if_rewriter = IfProcessor.new 
   mirrorer = new_class_mirrorer
 
   # Aquarium changes the methods to advise them, so save them beforehand
@@ -81,10 +83,11 @@ def main
       sexp = processor.process(deep_copy_of_array(translated))
 
       # Do stuff with sexp...
+      rewritten_sexp = if_rewriter.process sexp
 
-      code_again = sexp_to_string sexp
+      code_again = sexp_to_string rewritten_sexp
 
-      # Uncomment this if you want to check that it IS getting the code.
+      # Uncomment this if you want to check that it IS processing the code.
       #puts code_again 
       
       # We need to "install" the modified method into the object

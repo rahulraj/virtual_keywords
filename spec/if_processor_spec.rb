@@ -40,10 +40,10 @@ describe 'if_processor' do
     code_result = sexp_to_string result
     #puts code_result # Uncomment this to see the translated code.
 
-    # my_if does not change the behavior, so both the old and new
-    # code should produce the same result (greet is referentially
+    # my_if is a dummy method that does not change behavior, so both the
+    # old and new code should produce the same result (greet is referentially
     # transparent)
-    greeter = Greeter.new true
+    greeter = Greeter.new false
     old_result = greeter.greet
     greeter.instance_eval code_result # Put in the new method
     new_result = greeter.greet
