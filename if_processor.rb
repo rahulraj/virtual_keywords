@@ -11,7 +11,7 @@ class IfProcessor < SexpProcessor
   end
 
   # Process calls this on every :if sexp. Returns a rewritten sexp.
-  # Based on the example from sexps.txt
+  # Based on the example from sexps_greet.txt
   def rewrite_if(expression)
     # The sexp for the condition passed to if is inside expression[1]
     # We can further process this sexp if it has and/or in it.

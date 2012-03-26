@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-# TODO Inspect the printed output, figure out how to rewrite the sexp
 describe 'if_processor' do
 
   before :each do
@@ -18,6 +17,10 @@ describe 'if_processor' do
     @if_processor = IfProcessor.new
   end
 
+  # These two "specs" produce sexps that I used to figure out how
+  # to do the rewrite. Their outputs are in sexps_greet.txt and
+  # count_to_ten_sexp.txt
+  
   #it 'compares sexps of manually translated if' do
     #puts 'before translation'
     #p @greet_sexp
