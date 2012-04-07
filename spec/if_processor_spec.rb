@@ -23,6 +23,7 @@ describe 'if_processor' do
     @greet_unless_sexp = method_to_sexp(Greeter, :greet_unless)
     @greet_unless_else_sexp = method_to_sexp(Greeter, :greet_unless_else)
     @greet_postfix_unless_sexp = method_to_sexp(Greeter, :greet_postfix_unless)
+    @greet_all_sexp = method_to_sexp(Greeter, :greet_all)
 
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
 
@@ -107,5 +108,23 @@ describe 'if_processor' do
   it 'should process greet with postfix unless' do
     greet_variation_should_work(@greet_postfix_unless_sexp,
                                 :greet_postfix_unless)
+  end
+
+  it 'should combine ifs without interference' do
+    result = @if_processor.process @greet_all_sexp
+
+    # Visually inspecting this result, it appears to be right
+    code_result = sexp_to_string result
+    #puts code_result # Uncomment this to see the translated code.
+
+    # my_if is a dummy method that does not change behavior, so both the
+    # old and new code should produce the same result (greet is referentially
+    # transparent), except that $my_if_calls is incremented
+    old_result = @greeter.greet_all
+    @greeter.instance_eval code_result # Put in the new method
+    new_result = @greeter.greet_all
+
+    new_result.should eql old_result
+    $my_if_calls.should eql 5    
   end
 end

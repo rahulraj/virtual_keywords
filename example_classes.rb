@@ -98,6 +98,31 @@ class Greeter < ApplicationController
           lambda { 'Good' + 'bye' })
   end
 
+  # All together now
+  def greet_all
+    result = ''
+    # 1
+    if @hello
+      result = 'Hello'
+    else
+      result = 'Goodbye'
+    end
+    # 2
+    if 2 + 2 == 4
+      result += '\nMath is right'
+    end
+    # 3
+    result += '\nThis is supposed to look like English' if false
+    # 4
+    unless 2 + 9 == 10
+      result += '\nMath should work in unless too'
+    end
+    # 5
+    result += '\nWorld!' unless true
+
+    result
+  end
+
   def count_to_ten
     [1..10].each do |index|
       puts index
