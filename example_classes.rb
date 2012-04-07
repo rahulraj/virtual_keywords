@@ -38,15 +38,58 @@ class Greeter < ApplicationController
   #
   # spec/if_processor_spec runs a test over greet
 
-  # An example conditional
-  def greet
+  # An example conditional: if and else
+  def greet_if_else
     if @hello
-      'Hello World!'
+      'Hello World! (if else)'
     else
       # Compound expressions should be preserved
       # (i.e. not evaluated too early or in the wrong context)
-      'Good' + 'bye'
+      'Good' + 'bye (if else)'
     end
+  end
+
+  # If without else
+  def greet_if_without_else
+    if @hello
+      'Hello World! (if without else)'
+    end
+  end
+
+  # Postfix if
+  def greet_postfix_if
+    'Hello World! (postfix if)' if @hello
+  end
+
+  # If, then, else
+  def greet_if_then_else
+    if @hello then 'Hello World! (if then else)' else 'Goodbye (if then else)' end
+  end
+
+  # If, then, no else
+  def greet_if_then_no_else
+    if @hello then 'Hello World! (if then)' end
+  end
+
+  # Unless
+  def greet_unless
+    unless @hello
+      'Goodbye (unless)'
+    end
+  end
+
+  # Unless, then else
+  def greet_unless_else
+    unless @hello
+      'Goodbye (unless else)'
+    else
+      'Hello World! (unless else)'
+    end
+  end
+
+  # Postfix unless
+  def greet_postfix_unless
+    'Goodbye (postfix unless)' unless @hello
   end
 
   # What the conditional in greet should look like after processing

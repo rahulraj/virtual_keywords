@@ -11,10 +11,25 @@ describe 'if_processor' do
       @sexp_processor.process translated
     end
 
-    @greet_sexp = method_to_sexp(Greeter, :greet)
+    @greeter = Greeter.new true
+
+    @greet_if_else_sexp = method_to_sexp(Greeter, :greet_if_else)
+    @greet_if_without_else_sexp = method_to_sexp(Greeter,
+                                                 :greet_if_without_else)
+    @greet_postfix_if_sexp = method_to_sexp(Greeter, :greet_postfix_if)
+    @greet_if_then_else_sexp = method_to_sexp(Greeter, :greet_if_then_else)
+    @greet_if_then_no_else_sexp = method_to_sexp(Greeter,
+                                                 :greet_if_then_no_else)
+    @greet_unless_sexp = method_to_sexp(Greeter, :greet_unless)
+    @greet_unless_else_sexp = method_to_sexp(Greeter, :greet_unless_else)
+    @greet_postfix_unless_sexp = method_to_sexp(Greeter, :greet_postfix_unless)
+
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
 
     @if_processor = IfProcessor.new
+
+    # TODO Use mocking on my_if instead of this global variable
+    $my_if_calls = 0
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -35,9 +50,9 @@ describe 'if_processor' do
     #count_sexp = method_to_sexp(Greeter, :count_to_ten)
     #p count_sexp
   #end
-
-  it 'should process greet' do
-    result = @if_processor.process @greet_sexp    
+  
+  def greet_variation_should_work(sexp, method_name)
+    result = @if_processor.process sexp
 
     # Visually inspecting this result, it appears to be right
     code_result = sexp_to_string result
@@ -45,12 +60,52 @@ describe 'if_processor' do
 
     # my_if is a dummy method that does not change behavior, so both the
     # old and new code should produce the same result (greet is referentially
-    # transparent)
-    greeter = Greeter.new false
-    old_result = greeter.greet
-    greeter.instance_eval code_result # Put in the new method
-    new_result = greeter.greet
+    # transparent), except that $my_if_calls is incremented
+    old_result = @greeter.send method_name
+    @greeter.instance_eval code_result # Put in the new method
+    new_result = @greeter.send method_name
 
     new_result.should eql old_result
+    $my_if_calls.should eql 1
+  end
+ 
+  it 'should process greet with if and else' do
+    greet_variation_should_work(@greet_if_else_sexp, :greet_if_else)
+  end
+
+  it 'should process greet with if without else' do
+    # We don't need to do anything special for if without else
+    # They use the same sexp as if with else, with an empty block for the
+    # else clause
+    greet_variation_should_work(@greet_if_without_else_sexp,
+                                :greet_if_without_else)
+  end
+
+  it 'should process greet with postfix if' do
+    # Again, we don't need to do anything special - they turn into the same sexp
+    greet_variation_should_work(@greet_postfix_if_sexp, :greet_postfix_if)
+  end
+
+  it 'should process greet with if then else on one line' do
+    greet_variation_should_work(@greet_if_then_else_sexp,
+                                :greet_if_then_else)
+  end
+
+  it 'should process greet with if then but no else on one line' do
+    greet_variation_should_work(@greet_if_then_no_else_sexp,
+                                :greet_if_then_no_else)
+  end
+
+  it 'should process greet with unless' do
+    greet_variation_should_work(@greet_unless_sexp, :greet_unless)    
+  end
+
+  it 'shuld process greet with unless and else' do
+    greet_variation_should_work(@greet_unless_else_sexp, :greet_unless_else)
+  end
+
+  it 'should process greet with postfix unless' do
+    greet_variation_should_work(@greet_postfix_unless_sexp,
+                                :greet_postfix_unless)
   end
 end
