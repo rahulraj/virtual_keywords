@@ -24,6 +24,7 @@ describe 'if_processor' do
     @greet_unless_else_sexp = method_to_sexp(Greeter, :greet_unless_else)
     @greet_postfix_unless_sexp = method_to_sexp(Greeter, :greet_postfix_unless)
     @greet_all_sexp = method_to_sexp(Greeter, :greet_all)
+    @greet_nested_sexp = method_to_sexp(Greeter, :greet_nested)
 
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
 
@@ -52,12 +53,15 @@ describe 'if_processor' do
     #p count_sexp
   #end
   
-  def greet_variation_should_work(sexp, method_name)
+  def greet_variation_should_work(sexp, method_name, if_calls = 1,
+                                  verbose = false)
     result = @if_processor.process sexp
 
     # Visually inspecting this result, it appears to be right
     code_result = sexp_to_string result
-    #puts code_result # Uncomment this to see the translated code.
+    if verbose
+      puts code_result
+    end
 
     # my_if is a dummy method that does not change behavior, so both the
     # old and new code should produce the same result (greet is referentially
@@ -67,7 +71,7 @@ describe 'if_processor' do
     new_result = @greeter.send method_name
 
     new_result.should eql old_result
-    $my_if_calls.should eql 1
+    $my_if_calls.should eql if_calls
   end
  
   it 'should process greet with if and else' do
@@ -111,20 +115,10 @@ describe 'if_processor' do
   end
 
   it 'should combine ifs without interference' do
-    result = @if_processor.process @greet_all_sexp
+    greet_variation_should_work(@greet_all_sexp, :greet_all, 5)
+  end
 
-    # Visually inspecting this result, it appears to be right
-    code_result = sexp_to_string result
-    #puts code_result # Uncomment this to see the translated code.
-
-    # my_if is a dummy method that does not change behavior, so both the
-    # old and new code should produce the same result (greet is referentially
-    # transparent), except that $my_if_calls is incremented
-    old_result = @greeter.greet_all
-    @greeter.instance_eval code_result # Put in the new method
-    new_result = @greeter.greet_all
-
-    new_result.should eql old_result
-    $my_if_calls.should eql 5    
+  it 'should handle nested ifs' do
+    greet_variation_should_work(@greet_nested_sexp, :greet_nested, 2)
   end
 end

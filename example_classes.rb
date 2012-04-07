@@ -123,6 +123,21 @@ class Greeter < ApplicationController
     result
   end
 
+  def greet_nested
+    if true
+      # This if should be processed, even though it never happens!
+      if 2 + 2 == 4
+        'Math is right'
+      else
+        'Weird'
+      end
+    else
+      # This if should be expanded, but NOT evaluated!
+      puts 'hi there' if true
+      'The false case'
+    end
+  end
+
   def count_to_ten
     [1..10].each do |index|
       puts index
