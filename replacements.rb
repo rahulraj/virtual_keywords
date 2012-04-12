@@ -4,6 +4,7 @@
 $my_if_calls = 0
 $my_and_calls = 0
 $my_or_calls = 0
+$my_symbolic_and_calls = 0
 
 def my_if(a, b, c)
   $my_if_calls += 1
@@ -18,4 +19,9 @@ end
 def my_or(a, b)
   $my_or_calls += 1
   a.call or b.call
+end
+
+def my_symbolic_and(a, b)
+  $my_symbolic_and_calls += 1  
+  a.call && b.call
 end

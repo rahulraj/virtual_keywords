@@ -14,6 +14,7 @@ describe 'if_processor' do
     @greeter = Greeter.new true
     @and_user = AndUser.new false
     @or_user = OrUser.new true
+    @operator_user = OperatorUser.new false
 
     @greet_if_else_sexp = method_to_sexp(Greeter, :greet_if_else)
     @greet_if_without_else_sexp = method_to_sexp(Greeter,
@@ -35,9 +36,14 @@ describe 'if_processor' do
     @method_with_or_sexp = method_to_sexp(OrUser, :method_with_or)
     @if_with_or_sexp = method_to_sexp(OrUser, :if_with_or)
 
+    @symbolic_and_sexp = method_to_sexp(OperatorUser, :symbolic_and)
+
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
     @method_with_and_result_sexp = method_to_sexp(AndUser,
                                                   :method_with_and_result)
+    @symbolic_and_result_sexp = method_to_sexp(OperatorUser,
+                                               :symbolic_and_result)
+
 
     @if_processor = IfProcessor.new
 
@@ -45,6 +51,7 @@ describe 'if_processor' do
     $my_if_calls = 0
     $my_and_calls = 0
     $my_or_calls = 0
+    $my_symbolic_and_calls = 0
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -74,6 +81,19 @@ describe 'if_processor' do
 
     #puts 'after'
     #p @method_with_and_result_sexp
+    #puts ''
+  #end
+  
+  # Spec used to see how && should be translated
+  # Looks like it uses :and same as the other one
+  # Aren't they different semantically though?
+  #it 'compares sexps of manually translated &&' do
+    #puts 'before'
+    #p @symbolic_and_sexp
+    #puts ''
+
+    #puts 'after'
+    #p @symbolic_and_result_sexp
     #puts ''
   #end
 
@@ -172,5 +192,10 @@ describe 'if_processor' do
     do_rewrite(@if_with_or_sexp, :if_with_or, @or_user)
     $my_or_calls.should eql 1
     $my_if_calls.should eql 1
+  end
+
+  it 'should rewrite &&' do
+    do_rewrite(@symbolic_and_sexp, :symbolic_and, @operator_user)
+    $my_and_calls.should eql 1
   end
 end

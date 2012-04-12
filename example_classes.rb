@@ -184,3 +184,22 @@ class OrUser < ApplicationController
     end
   end
 end
+
+# Ruby also lets you use the && and || operators
+# I think they have different precedence rules
+# TODO I see a possible issue here. If a user mixes the words with the operators
+# how will we handle their precedence?
+# Function application has a different precedence from operators
+class OperatorUser < ActiveRecord::Base
+  def initialize(value)
+    @value = value
+  end
+
+  def symbolic_and
+    @value && false
+  end
+
+  def symbolic_and_result
+    my_conditional_and(lambda { @value }, lambda { false })
+  end
+end
