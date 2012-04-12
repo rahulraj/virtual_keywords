@@ -138,17 +138,31 @@ class Greeter < ApplicationController
     end
   end
 
-  def method_with_and
-    @hello and true
-  end
-
-  def method_with_and_result
-    my_and(lambda { @hello }, lambda { true })
-  end
-
   def count_to_ten
     [1..10].each do |index|
       puts index
     end
+  end
+end
+
+class AndUser < ActiveRecord::Base
+  def initialize(value)
+    @value = value
+  end
+
+  def method_with_and
+    @value and true
+  end
+
+  def if_with_an_and
+    if @value and true
+      'Both @value and true were true (the latter is no surprise)'
+    else
+      '@value must have been false, I doubt true was false!'
+    end
+  end
+
+  def method_with_and_result
+    my_and(lambda { @hello }, lambda { true })
   end
 end

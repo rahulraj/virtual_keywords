@@ -12,6 +12,7 @@ describe 'if_processor' do
     end
 
     @greeter = Greeter.new true
+    @and_user = AndUser.new false
 
     @greet_if_else_sexp = method_to_sexp(Greeter, :greet_if_else)
     @greet_if_without_else_sexp = method_to_sexp(Greeter,
@@ -26,16 +27,19 @@ describe 'if_processor' do
     @greet_all_sexp = method_to_sexp(Greeter, :greet_all)
     @greet_nested_sexp = method_to_sexp(Greeter, :greet_nested)
 
-    @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
 
-    @method_with_and_sexp = method_to_sexp(Greeter, :method_with_and)
-    @method_with_and_result_sexp = method_to_sexp(Greeter,
+    @method_with_and_sexp = method_to_sexp(AndUser, :method_with_and)
+    @if_with_an_and_sexp = method_to_sexp(AndUser, :if_with_an_and)
+
+    @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
+    @method_with_and_result_sexp = method_to_sexp(AndUser,
                                                   :method_with_and_result)
 
     @if_processor = IfProcessor.new
 
     # TODO Use mocking on my_if instead of this global variable
     $my_if_calls = 0
+    $my_and_calls = 0
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -67,9 +71,8 @@ describe 'if_processor' do
     #p @method_with_and_result_sexp
     #puts ''
   #end
-  
-  def greet_variation_should_work(sexp, method_name, if_calls = 1,
-                                  verbose = false)
+
+  def do_rewrite(sexp, method_name, object, verbose)
     result = @if_processor.process sexp
 
     # Visually inspecting this result, it appears to be right
@@ -81,59 +84,83 @@ describe 'if_processor' do
     # my_if is a dummy method that does not change behavior, so both the
     # old and new code should produce the same result (greet is referentially
     # transparent), except that $my_if_calls is incremented
-    old_result = @greeter.send method_name
-    @greeter.instance_eval code_result # Put in the new method
-    new_result = @greeter.send method_name
+    old_result = object.send method_name
+    object.instance_eval code_result # Put in the new method
+    new_result = object.send method_name
 
     new_result.should eql old_result
-    $my_if_calls.should eql if_calls
+  end
+  
+  
+  def greeter_rewrite_should_work(sexp, method_name,
+                                  required_calls = 1, verbose = false)
+    do_rewrite(sexp, method_name, @greeter, verbose)
+    $my_if_calls.should eql required_calls
   end
  
-  it 'should process greet with if and else' do
-    greet_variation_should_work(@greet_if_else_sexp, :greet_if_else)
+  it 'should rewrite greet with if and else' do
+    greeter_rewrite_should_work(@greet_if_else_sexp, :greet_if_else)
   end
 
-  it 'should process greet with if without else' do
+  it 'should rewrite greet with if without else' do
     # We don't need to do anything special for if without else
     # They use the same sexp as if with else, with an empty block for the
     # else clause
-    greet_variation_should_work(@greet_if_without_else_sexp,
+    greeter_rewrite_should_work(@greet_if_without_else_sexp,
                                 :greet_if_without_else)
   end
 
-  it 'should process greet with postfix if' do
+  it 'should rewrite greet with postfix if' do
     # Again, we don't need to do anything special - they turn into the same sexp
-    greet_variation_should_work(@greet_postfix_if_sexp, :greet_postfix_if)
+    greeter_rewrite_should_work(@greet_postfix_if_sexp, :greet_postfix_if)
   end
 
-  it 'should process greet with if then else on one line' do
-    greet_variation_should_work(@greet_if_then_else_sexp,
+  it 'should rewrite greet with if then else on one line' do
+    greeter_rewrite_should_work(@greet_if_then_else_sexp,
                                 :greet_if_then_else)
   end
 
-  it 'should process greet with if then but no else on one line' do
-    greet_variation_should_work(@greet_if_then_no_else_sexp,
+  it 'should rewrite greet with if then but no else on one line' do
+    greeter_rewrite_should_work(@greet_if_then_no_else_sexp,
                                 :greet_if_then_no_else)
   end
 
-  it 'should process greet with unless' do
-    greet_variation_should_work(@greet_unless_sexp, :greet_unless)    
+  it 'should rewrite greet with unless' do
+    greeter_rewrite_should_work(@greet_unless_sexp, :greet_unless)    
   end
 
-  it 'should process greet with unless and else' do
-    greet_variation_should_work(@greet_unless_else_sexp, :greet_unless_else)
+  it 'should rewrite greet with unless and else' do
+    greeter_rewrite_should_work(@greet_unless_else_sexp, :greet_unless_else)
   end
 
-  it 'should process greet with postfix unless' do
-    greet_variation_should_work(@greet_postfix_unless_sexp,
+  it 'should rewrite greet with postfix unless' do
+    greeter_rewrite_should_work(@greet_postfix_unless_sexp,
                                 :greet_postfix_unless)
   end
 
   it 'should combine ifs without interference' do
-    greet_variation_should_work(@greet_all_sexp, :greet_all, 5)
+    greeter_rewrite_should_work(@greet_all_sexp, :greet_all, required_calls = 5)
   end
 
   it 'should handle nested ifs' do
-    greet_variation_should_work(@greet_nested_sexp, :greet_nested, 2)
+    greeter_rewrite_should_work(@greet_nested_sexp, :greet_nested,
+                                required_calls = 2)
+  end
+
+  def and_user_rewrite_should_work(sexp, method_name, required_calls = 1,
+                              verbose = false)
+    do_rewrite(sexp, method_name, @and_user, verbose)
+    $my_and_calls.should eql required_calls
+  end
+
+  it 'should rewrite "and" statements' do
+    and_user_rewrite_should_work(@method_with_and_sexp, :method_with_and)
+  end
+
+  it 'should handle ifs with "and"s in the predicate' do
+    do_rewrite(@if_with_an_and_sexp, :if_with_an_and, @and_user,
+               verbose = false)
+    $my_and_calls.should eql 1
+    $my_if_calls.should eql 1
   end
 end
