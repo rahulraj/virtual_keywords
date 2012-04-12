@@ -1,4 +1,4 @@
-require 'my_if'
+require 'replacements'
 
 # Stub "Rails" classes
 module ActiveRecord
@@ -136,6 +136,14 @@ class Greeter < ApplicationController
       puts 'hi there' if true
       'The false case'
     end
+  end
+
+  def method_with_and
+    @hello and true
+  end
+
+  def method_with_and_result
+    my_and(lambda { @hello }, lambda { true })
   end
 
   def count_to_ten

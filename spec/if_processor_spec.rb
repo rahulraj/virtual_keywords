@@ -28,6 +28,10 @@ describe 'if_processor' do
 
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
 
+    @method_with_and_sexp = method_to_sexp(Greeter, :method_with_and)
+    @method_with_and_result_sexp = method_to_sexp(Greeter,
+                                                  :method_with_and_result)
+
     @if_processor = IfProcessor.new
 
     # TODO Use mocking on my_if instead of this global variable
@@ -51,6 +55,17 @@ describe 'if_processor' do
   #it 'turns a method with block code into a sexp' do
     #count_sexp = method_to_sexp(Greeter, :count_to_ten)
     #p count_sexp
+  #end
+  
+  # Spec used to see how "and" should be translated
+  #it 'compares sexps of manually translated and' do
+    #puts 'before'
+    #p @method_with_and_sexp
+    #puts ''
+
+    #puts 'after'
+    #p @method_with_and_result_sexp
+    #puts ''
   #end
   
   def greet_variation_should_work(sexp, method_name, if_calls = 1,
@@ -105,7 +120,7 @@ describe 'if_processor' do
     greet_variation_should_work(@greet_unless_sexp, :greet_unless)    
   end
 
-  it 'shuld process greet with unless and else' do
+  it 'should process greet with unless and else' do
     greet_variation_should_work(@greet_unless_else_sexp, :greet_unless_else)
   end
 

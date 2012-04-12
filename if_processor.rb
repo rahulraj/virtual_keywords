@@ -33,4 +33,20 @@ class IfProcessor < SexpProcessor
       )
     )
   end
+
+  def rewrite_and(expression)
+    first = expression[1]
+    second = expression[2]
+
+    s(:fcall, :my_and,
+      s(:array,
+        s(:iter,
+          s(:fcall, :lambda), nil, first
+        ),
+        s(:iter,
+          s(:fcall, :lambda), nil, second
+        )
+      )
+    )
+  end
 end

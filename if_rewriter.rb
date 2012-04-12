@@ -7,7 +7,7 @@ require 'parse_tree'
 require 'ruby2ruby'
 require 'aquarium'
 
-require 'my_if'
+require 'replacements'
 require 'if_processor'
 require 'sexp_to_string'
 require 'example_classes'
