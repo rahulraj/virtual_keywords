@@ -34,11 +34,11 @@ class IfProcessor < SexpProcessor
     )
   end
 
-  def rewrite_and(expression)
-    first = expression[1]
-    second = expression[2]
-
-    s(:fcall, :my_and,
+  # Call a 2-argument function used to replace an operator (like "and" or "or")
+  # function_name is the name of the function to call (like "my_and")
+  # first and second will be wrapped in lambdas and passed to that function
+  def call_operator_replacement(function_name, first, second)
+    s(:fcall, function_name,
       s(:array,
         s(:iter,
           s(:fcall, :lambda), nil, first
@@ -48,5 +48,19 @@ class IfProcessor < SexpProcessor
         )
       )
     )
+  end
+
+  def rewrite_and(expression)
+    first = expression[1]
+    second = expression[2]
+
+    call_operator_replacement(:my_and, first, second)
+  end
+
+  def rewrite_or(expression)
+    first = expression[1]
+    second = expression[2]
+
+    call_operator_replacement(:my_or, first, second)
   end
 end

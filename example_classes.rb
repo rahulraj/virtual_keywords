@@ -154,7 +154,7 @@ class AndUser < ActiveRecord::Base
     @value and true
   end
 
-  def if_with_an_and
+  def if_with_and
     if @value and true
       'Both @value and true were true (the latter is no surprise)'
     else
@@ -163,6 +163,24 @@ class AndUser < ActiveRecord::Base
   end
 
   def method_with_and_result
-    my_and(lambda { @hello }, lambda { true })
+    my_and(lambda { @value }, lambda { true })
+  end
+end
+
+class OrUser < ApplicationController
+  def initialize(value)
+    @value = value
+  end
+
+  def method_with_or
+    @value or false
+  end
+
+  def if_with_or
+    if @value or true
+      'Both @value or true were true (the latter is no surprise)'
+    else
+      "This can't happen!"
+    end
   end
 end

@@ -13,6 +13,7 @@ describe 'if_processor' do
 
     @greeter = Greeter.new true
     @and_user = AndUser.new false
+    @or_user = OrUser.new true
 
     @greet_if_else_sexp = method_to_sexp(Greeter, :greet_if_else)
     @greet_if_without_else_sexp = method_to_sexp(Greeter,
@@ -29,7 +30,10 @@ describe 'if_processor' do
 
 
     @method_with_and_sexp = method_to_sexp(AndUser, :method_with_and)
-    @if_with_an_and_sexp = method_to_sexp(AndUser, :if_with_an_and)
+    @if_with_and_sexp = method_to_sexp(AndUser, :if_with_and)
+
+    @method_with_or_sexp = method_to_sexp(OrUser, :method_with_or)
+    @if_with_or_sexp = method_to_sexp(OrUser, :if_with_or)
 
     @greet_changed_sexp = method_to_sexp(Greeter, :greet_changed)
     @method_with_and_result_sexp = method_to_sexp(AndUser,
@@ -37,9 +41,10 @@ describe 'if_processor' do
 
     @if_processor = IfProcessor.new
 
-    # TODO Use mocking on my_if instead of this global variable
+    # TODO Use mocking instead of global variables
     $my_if_calls = 0
     $my_and_calls = 0
+    $my_or_calls = 0
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -72,7 +77,7 @@ describe 'if_processor' do
     #puts ''
   #end
 
-  def do_rewrite(sexp, method_name, object, verbose)
+  def do_rewrite(sexp, method_name, object, verbose = false)
     result = @if_processor.process sexp
 
     # Visually inspecting this result, it appears to be right
@@ -147,20 +152,25 @@ describe 'if_processor' do
                                 required_calls = 2)
   end
 
-  def and_user_rewrite_should_work(sexp, method_name, required_calls = 1,
-                              verbose = false)
-    do_rewrite(sexp, method_name, @and_user, verbose)
-    $my_and_calls.should eql required_calls
-  end
-
   it 'should rewrite "and" statements' do
-    and_user_rewrite_should_work(@method_with_and_sexp, :method_with_and)
+    do_rewrite(@method_with_and_sexp, :method_with_and, @and_user)
+    $my_and_calls.should eql 1
   end
 
   it 'should handle ifs with "and"s in the predicate' do
-    do_rewrite(@if_with_an_and_sexp, :if_with_an_and, @and_user,
-               verbose = false)
+    do_rewrite(@if_with_and_sexp, :if_with_and, @and_user)
     $my_and_calls.should eql 1
+    $my_if_calls.should eql 1
+  end
+
+  it 'should rewrite "or" statements' do
+    do_rewrite(@method_with_or_sexp, :method_with_or, @or_user)
+    $my_or_calls.should eql 1
+  end
+
+  it 'should handle ifs with "or"s in the predicate' do
+    do_rewrite(@if_with_or_sexp, :if_with_or, @or_user)
+    $my_or_calls.should eql 1
     $my_if_calls.should eql 1
   end
 end
