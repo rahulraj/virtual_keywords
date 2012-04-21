@@ -7,7 +7,7 @@ Gem::Specification.new do |specification|
       'functions, for DSLs'
   specification.authors = ['Rahul Rajagopalan']
   specification.email = 'rahulrajago@gmail.com'
-  #s.files  = ["lib/hola.rb"]
+  specification.files  = ["lib/virtual_keywords.rb"]
   #s.homepage    =
     #'http://rubygems.org/gems/hola'
 end
