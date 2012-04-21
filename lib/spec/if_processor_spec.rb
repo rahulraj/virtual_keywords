@@ -1,14 +1,14 @@
-require 'spec_helper'
+  require 'spec_helper'
 
-describe 'if_processor' do
+  describe 'if_processor' do
 
-  before :each do
-    @sexp_processor = SexpProcessor.new
+    before :each do
+      @sexp_processor = SexpProcessor.new
 
-    def method_to_sexp(klass, method)
-      translated = ParseTree.translate(klass, method)
+      def method_to_sexp(klass, method)
+        translated = ParseTree.translate(klass, method)
 
-      @sexp_processor.process translated
+        @sexp_processor.process translated
     end
 
     @greeter = Greeter.new true

@@ -1,8 +1,3 @@
-PATH
-  remote: lib/Aquarium/aquarium
-  specs:
-    aquarium (0.0.0)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -33,8 +28,6 @@ PLATFORMS
 
 DEPENDENCIES
   ParseTree
-  aquarium (= 0.0.0)!
   rspec
   ruby2ruby
-  ruby_parser (= 2.0.6)
   sexp_processor
