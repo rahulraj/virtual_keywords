@@ -99,9 +99,10 @@
 
   def do_rewrite(sexp, method_name, object, verbose = false)
     result = @if_processor.process sexp
+    stringifier = SexpStringifier.new
 
     # Visually inspecting this result, it appears to be right
-    code_result = sexp_to_string result
+    code_result = stringifier.stringify result
     if verbose
       puts code_result
     end

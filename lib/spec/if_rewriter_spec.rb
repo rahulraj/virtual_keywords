@@ -8,7 +8,7 @@ describe 'if_rewriter' do
 
   it 'finds the subclasses of classes and flattens the result' do
     rails_classes = [ActiveRecord::Base, ApplicationController]
-    subclasses = subclasses_of rails_classes
+    subclasses = subclasses_of_classes rails_classes
 
     subclasses.should include Fizzbuzzer
     subclasses.should include Greeter

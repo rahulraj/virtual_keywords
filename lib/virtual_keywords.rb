@@ -1,4 +1,4 @@
-require 'virtual_keywords/sexp_to_string'
+require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/replacements'
 require 'virtual_keywords/example_classes'
 require 'virtual_keywords/class_mirrorer'

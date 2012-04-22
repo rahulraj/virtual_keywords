@@ -28,7 +28,7 @@ module VirtualKeywords
   #           in a flattened array.
   def subclasses_of_classes(klasses)
     klasses.map { |klass|
-      descendants_of_class klass
+      subclasses_of_class klass
     }.flatten
   end
 
@@ -86,9 +86,13 @@ module VirtualKeywords
     #                     rewrites methods.
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
     #                   ParseTree results into sexps.
-    def initialize(keyword_rewriter, sexp_processor)
+    #   sexp_stringifier: (SexpStringifier) an object that can turn sexps
+    #                     back into Ruby code (optional)
+    def initialize(keyword_rewriter, sexp_processor,
+                   sexp_stringifier = SexpStringifier.new)
       @keyword_rewriter = keyword_rewriter
       @sexp_processor = sexp_processor
+      @sexp_stringifier = sexp_stringifier
     end
 
     # Rewrite keywords in the methods of a class.
@@ -101,7 +105,7 @@ module VirtualKeywords
         sexp = sexp_processor.process(deep_copy_array(translated))
         rewritten_sexp = @keyword_rewriter.process sexp
 
-        install_method(klass, name, sexp_to_string(rewritten_sexp)) 
+        install_method(klass, name, @sexp_stringifier.stringify(rewritten_sexp))
       end
     end
   end
@@ -113,6 +117,7 @@ module VirtualKeywords
     to_intercept = subclasses_of_classes rails_classes
     processor = SexpProcessor.new
     if_rewriter = IfProcessor.new 
+    sexp_stringifier = SexpStringifier.new
     mirrorer = new_class_mirrorer
 
     # Aquarium changes the methods to advise them, so save them beforehand
@@ -144,7 +149,7 @@ module VirtualKeywords
         # Do stuff with sexp...
         rewritten_sexp = if_rewriter.process sexp
 
-        code_again = sexp_to_string rewritten_sexp
+        code_again = sexp_stringifier.stringify rewritten_sexp
 
         # Uncomment this if you want to check that it IS processing the code.
         #puts code_again 
@@ -158,7 +163,7 @@ module VirtualKeywords
 
         # But this issue is fixable. Put the Aquarium method back in.
         modified_sexp = processor.process modified_method
-        modified_code = sexp_to_string modified_sexp
+        modified_code = sexp_stringifier.stringify modified_sexp
         obj.instance_eval modified_code
 
         # Finally, send the result of the method call through
