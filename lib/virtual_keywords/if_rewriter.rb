@@ -82,7 +82,7 @@ module VirtualKeywords
     # Initialize a Virtualizer
     # 
     # Arguments:
-    #   keyword_rewriter: (IfProcessor) the SexpProcessor descendant that
+    #   keyword_rewriter: (KeywordRewriter) the SexpProcessor descendant that
     #                     rewrites methods.
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
     #                   ParseTree results into sexps.
@@ -116,7 +116,7 @@ module VirtualKeywords
     rails_classes = [ActiveRecord::Base, ApplicationController]
     to_intercept = subclasses_of_classes rails_classes
     processor = SexpProcessor.new
-    if_rewriter = IfProcessor.new 
+    if_rewriter = KeywordRewriter.new 
     sexp_stringifier = SexpStringifier.new
     mirrorer = new_class_mirrorer
 

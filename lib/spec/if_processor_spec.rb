@@ -45,7 +45,7 @@
                                                :symbolic_and_result)
 
 
-    @if_processor = IfProcessor.new
+    @if_processor = KeywordRewriter.new
 
     # TODO Use mocking instead of global variables
     $my_if_calls = 0

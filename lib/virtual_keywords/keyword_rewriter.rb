@@ -1,6 +1,6 @@
 module VirtualKeywords
-  # Usage: create a new IfProcessor, then call process on a Sexp
-  class IfProcessor < SexpProcessor
+  # Usage: create a new KeywordRewriter, then call process on a Sexp
+  class KeywordRewriter < SexpProcessor
     def initialize
       super
       self.strict = false
