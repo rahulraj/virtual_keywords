@@ -55,19 +55,37 @@ module VirtualKeywords
 
     # Install a method on a class. When object.method_name is called
     # (for objects in the class), have them run the given code.
+    # TODO Should it be possible to recover the old method?
+    # How would that API look?
     #
     # Arguments:
     #   klass: (Class) the class which should be modified.
-    #   method_name: (Symbol) the name of the method to add (possibly overwriting
-    #                an existing method)
-    #   code: (String) the code that will be called in the new method.
-    def install_method(klass, method_name, code)
-      klass.class_eval do
-        define_method(method_name) do
-          self.instance_eval code
-        end
-      end
+    #   method_code: (String) the code for the method to install, of the format:
+    #                def method_name(args)
+    #                  ...
+    #                end
+    def install_method_on_class(klass, method_code)
+      klass.class_eval method_code
     end
+
+    # Install a method on an object. When object.method_name is called,
+    # runs the given code.
+    #
+    # This function can also be used for classmethods. For example, if you want
+    # to rewrite Klass.method_name (a method on Klass, a singleton Class),
+    # call this method (NOT install_method_on_class, that will modifiy objects
+    # created through Klass.new!)
+    #
+    # Arguments:
+    #   object: (Object) the object instance that should be modified.
+    #   method_code: (String) the code for the method to install, of the format:
+    #                def method_name(args)
+    #                  ...
+    #                end
+    def install_method_on_instance(object, method_code)
+      object.instance_eval method_code
+    end
+
   end
 
   # Deeply copy an array.
@@ -86,18 +104,46 @@ module VirtualKeywords
     # Initialize a Virtualizer
     # 
     # Arguments:
+    #   for_classes: (Array[Class]) an array of classes. All methods of objects
+    #                created from the given classes will be virtualized
+    #                (optional, the default is an empty Array).
+    #   for_instances: (Array[Object]) an array of object. All of these objects'
+    #                  methods will be virtualized
+    #                  (optional, the default is an empty Array).
+    #   for subclasses_of: (Array[Class]) an array of classes. All methods of
+    #                      objects created from the given classes' subclasses
+    #                      (but NOT those from the given classes) will be
+    #                      virtualized.
     #   keyword_rewriter: (KeywordRewriter) the SexpProcessor descendant that
-    #                     rewrites methods (optional).
+    #                     rewrites methods (optional, the default is
+    #                     KeywordRewriter.new).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
-    #                   ParseTree results into sexps (optional).
+    #                   ParseTree results into sexps (optional, the default is
+    #                   SexpProcessor.new).
     #   sexp_stringifier: (SexpStringifier) an object that can turn sexps
-    #                     back into Ruby code (optional).
-    def initialize(keyword_rewriter = KeywordRewriter.new,
+    #                     back into Ruby code (optional, the default is
+    #                     SexpStringifier.new).
+    #   rewritten_keywords: (RewrittenKeywords) a repository for keyword
+    #                       replacement lambdas (optional, the default is
+    #                       REWRITTEN_KEYWORDS).
+    def initialize(for_classes = [],
+                   for_instances = [],
+                   for_subclasses_of = [],
+                   keyword_rewriter = KeywordRewriter.new,
                    sexp_processor = SexpProcessor.new,
-                   sexp_stringifier = SexpStringifier.new)
+                   sexp_stringifier = SexpStringifier.new,
+                   rewritten_keywords = REWRITTEN_KEYWORDS)
+      @for_classes = for_classes
+      @for_instances = for_instances
+      @for_subclasses_of = for_subclasses_of
       @keyword_rewriter = keyword_rewriter
       @sexp_processor = sexp_processor
       @sexp_stringifier = sexp_stringifier
+      @rewritten_keywords = rewritten_keywords
+    end
+
+    def use_if(&block)
+      
     end
 
     # Rewrite keywords in the methods of a class.

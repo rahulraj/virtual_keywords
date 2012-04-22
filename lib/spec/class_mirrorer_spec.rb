@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'class_mirrorer' do
+describe 'ClassMirrorer' do
   before :each do
     @stub_parser = double('parser')
   end

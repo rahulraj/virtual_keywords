@@ -56,7 +56,7 @@ module VirtualKeywords
       key
     end
 
-    # Call an if virtual block in place of an actual if statement.
+    # Call an if virtual block in place of an actual if expression.
     # This function locates the lambda registered with the given object.
     #
     # Arguments:
@@ -69,17 +69,35 @@ module VirtualKeywords
     #            the user-supplied block may do something else)
     #
     # Raises:
-    #   RewriteLambdaNotProvided if no if lambda is available.
+    #   RewriteLambdaNotProvided if no "if" lambda is available.
     def call_if(caller_object, condition, then_do, else_do)
       key = key_or_raise(caller_object, :if)
       @objects_to_blocks[key].call(condition, then_do, else_do)
     end
 
+    # Call an "and" virtual block in place of an "and" expression.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object whose method this is being called in.
+    #   first: (Proc) The first operand of the "and", wrapped in a lambda.   
+    #   second: (Proc) The second operand of the "and", wrapped in a lambda.   
+    #   
+    # Raises:
+    #   RewriteLambdaNotProvided if no "and" lambda is available.
     def call_and(caller_object, first, second)
       key = key_or_raise(caller_object, :and)
       @objects_to_blocks[key].call(first, second)
     end
 
+    # Call an "or" virtual block in place of an "or" expression.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object whose method this is being called in.
+    #   first: (Proc) The first operand of the "or", wrapped in a lambda.   
+    #   second: (Proc) The second operand of the "or", wrapped in a lambda.   
+    #   
+    # Raises:
+    #   RewriteLambdaNotProvided if no "or" lambda is available.
     def call_or(caller_object, first, second)
       key = key_or_raise(caller_object, :or)
       @objects_to_blocks[key].call(first, second)
