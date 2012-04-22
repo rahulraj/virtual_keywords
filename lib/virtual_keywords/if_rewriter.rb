@@ -4,9 +4,9 @@
 module VirtualKeywords
 
   def descendants_of(parent)
-    result = []
-    ObjectSpace.each_object(Class) { |klass| result << klass if klass < parent }
-    result
+    ObjectSpace.each_object(Class).select { |klass|
+      klass < parent
+    }
   end
 
   # Given an array of base classes, return a flat array of all their subclasses
