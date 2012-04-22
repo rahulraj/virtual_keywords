@@ -1,13 +1,25 @@
 module VirtualKeywords
+  # Class that rewrites keywords in a given sexp.
   # Usage: create a new KeywordRewriter, then call process on a Sexp
   class KeywordRewriter < SexpProcessor
+    # Initialize a KeywordRewriter (self.strict is false)
     def initialize
       super
       self.strict = false
     end
 
-    # Process calls this on every :if sexp. Returns a rewritten sexp,
-    # that calls VirtualKeywords::REWRITTEN_KEYWORDS.call_if
+    # Rewrite an :if sexp. SexpProcessor#process is a template method that will
+    # call this method every time it encounters an :if.
+    #
+    # Arguments:
+    #   expression: (Sexp) the :if sexp to be rewritten.
+    #
+    # Returns:
+    #   (Sexp) A rewritten sexp that calls
+    #   VirtualKeywords::REWRITTEN_KEYWORDS.call_if with the condition,
+    #   then clause, and else clause as arguments, all wrapped in lambdas.
+    #   It must also pass self to call_if, so REWRITTEN_KEYWORDS can decide
+    #   which of the lambdas registered with it should be called.
     def rewrite_if(expression)
       # The sexp for the condition passed to if is inside expression[1]
       # We can further process this sexp if it has and/or in it.
@@ -29,34 +41,56 @@ module VirtualKeywords
       )
     end
 
-    # Call a 2-argument function used to replace an operator (like "and" or "or")
-    # function_name is the name of the function to call (like "my_and")
-    # first and second will be wrapped in lambdas and passed to that function
+    # Helper method. Call a 2-argument function used to replace an operator
+    # (like "and" or "or")
+    #
+    # Arguments:
+    #   method_name: (Symbol) the name of the REWRITTEN_KEYWORDS method that
+    #                should be called in the sexp.
+    #   first: (Sexp) the first argument to the method, which should be
+    #          wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
+    #   second: (Sexp) the second argument to the method, which should be
+    #            wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
     def call_operator_replacement(function_name, first, second)
-      s(:fcall, function_name,
+      s(:call,
+        s(:colon2,
+          s(:const, :VirtualKeywords),
+          :REWRITTEN_KEYWORDS
+        ), function_name,
         s(:array,
-          s(:iter,
-            s(:fcall, :lambda), nil, first
-          ),
-          s(:iter,
-            s(:fcall, :lambda), nil, second
-          )
+          s(:self),
+          s(:iter, s(:fcall, :lambda), nil, first),
+          s(:iter, s(:fcall, :lambda), nil, second)
         )
       )
     end
 
+    # Rewrite "and" expressions (automatically called by SexpProcessor#process)
+    #
+    # Arguments:
+    #   expression: (Sexp) the :and sexp to rewrite.
+    #
+    # Returns:
+    #   (Sexp): a sexp that instead calls REWRITTEN_KEYWORDS.call_and
     def rewrite_and(expression)
       first = expression[1]
       second = expression[2]
 
-      call_operator_replacement(:my_and, first, second)
+      call_operator_replacement(:call_and, first, second)
     end
 
+    # Rewrite "or" expressions (automatically called by SexpProcessor#process)
+    #
+    # Arguments:
+    #   expression: (Sexp) the :or sexp to rewrite.
+    #
+    # Returns:
+    #   (Sexp): a sexp that instead calls REWRITTEN_KEYWORDS.call_or
     def rewrite_or(expression)
       first = expression[1]
       second = expression[2]
 
-      call_operator_replacement(:my_or, first, second)
+      call_operator_replacement(:call_or, first, second)
     end
   end
 end

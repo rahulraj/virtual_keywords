@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe 'KeywordRewriter' do
-
   before :each do
     @sexp_processor = SexpProcessor.new
 
@@ -45,15 +44,19 @@ describe 'KeywordRewriter' do
 
     @rewriter = VirtualKeywords::KeywordRewriter.new
 
-    # TODO Use mocking instead of global variables
     @my_if_calls = 0
-
     def increment_my_if_calls
       @my_if_calls += 1
     end
 
-    $my_and_calls = 0
-    $my_or_calls = 0
+    @my_and_calls = 0
+    def increment_my_and_calls
+      @my_and_calls += 1
+    end
+    @my_or_calls = 0
+    def increment_my_or_calls
+      @my_or_calls += 1
+    end
     $my_symbolic_and_calls = 0
 
     spec = self
@@ -65,9 +68,39 @@ describe 'KeywordRewriter' do
         else_do.call
       end
     }
-    object_and_keyword = VirtualKeywords::ObjectAndKeyword.new(@greeter, :if)
+    my_and = lambda { |first, second|
+      increment_my_and_calls()
+      first.call and second.call
+    }
+    my_or = lambda { |first, second|
+      increment_my_or_calls()
+      first.call or second.call
+    }
+  
+    greeter_if = VirtualKeywords::ObjectAndKeyword.new(@greeter, :if)
     VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
-        object_and_keyword, my_if)
+        greeter_if, my_if)
+    
+    and_user_and = VirtualKeywords::ObjectAndKeyword.new(@and_user, :and)
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+        and_user_and, my_and)
+
+    and_user_if = VirtualKeywords::ObjectAndKeyword.new(@and_user, :if)
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+        and_user_if, my_if)
+
+    or_user_or = VirtualKeywords::ObjectAndKeyword.new(@or_user, :or)
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+        or_user_or, my_or)
+
+    or_user_if = VirtualKeywords::ObjectAndKeyword.new(@or_user, :if)
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+        or_user_if, my_if)
+
+    operator_user_and = VirtualKeywords::ObjectAndKeyword.new(
+        @operator_user, :and)
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+        operator_user_and, my_and)
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -139,86 +172,79 @@ describe 'KeywordRewriter' do
     @my_if_calls.should eql required_calls
   end
 
-  it 'should rewrite greet with if and else' do
+  it 'rewrites greet with if and else' do
     greeter_rewrite_should_work(@greet_if_else_sexp, :greet_if_else)
   end
 
+  it 'rewrites greet with if without else' do
+    # We don't need to do anything special for if without else
+    # They use the same sexp as if with else, with an empty block for the
+    # else clause
+    greeter_rewrite_should_work(@greet_if_without_else_sexp,
+                                :greet_if_without_else)
+  end
+
+  it 'rewrites greet with postfix if' do
+    # Again, we don't need to do anything special - they turn into the same sexp
+    greeter_rewrite_should_work(@greet_postfix_if_sexp, :greet_postfix_if)
+  end
+
+  it 'rewrites greet with if then else on one line' do
+    greeter_rewrite_should_work(@greet_if_then_else_sexp,
+                                :greet_if_then_else)
+  end
+
+  it 'rewrites greet with if then but no else on one line' do
+    greeter_rewrite_should_work(@greet_if_then_no_else_sexp,
+                                :greet_if_then_no_else)
+  end
+
+  it 'rewrites greet with unless' do
+    greeter_rewrite_should_work(@greet_unless_sexp, :greet_unless)    
+  end
+
+  it 'rewrites greet with unless and else' do
+    greeter_rewrite_should_work(@greet_unless_else_sexp, :greet_unless_else)
+  end
+
+  it 'rewrites greet with postfix unless' do
+    greeter_rewrite_should_work(@greet_postfix_unless_sexp,
+                                :greet_postfix_unless)
+  end
+
+  it 'combines ifs without interference' do
+    greeter_rewrite_should_work(@greet_all_sexp, :greet_all, required_calls = 5)
+  end
+
+  it 'handles nested ifs' do
+    greeter_rewrite_should_work(@greet_nested_sexp, :greet_nested,
+                                required_calls = 2)
+  end
+
+  it 'rewrites "and" statements' do
+    do_rewrite(@method_with_and_sexp, :method_with_and, @and_user)
+    @my_and_calls.should eql 1
+  end
+
+  it 'handles ifs with "and"s in the predicate' do
+    do_rewrite(@if_with_and_sexp, :if_with_and, @and_user)
+    @my_and_calls.should eql 1
+    @my_if_calls.should eql 1
+  end
+
+  it 'rewrites "or" statements' do
+    do_rewrite(@method_with_or_sexp, :method_with_or, @or_user)
+    @my_or_calls.should eql 1
+  end
+
+  it 'handles ifs with "or"s in the predicate' do
+    do_rewrite(@if_with_or_sexp, :if_with_or, @or_user)
+    @my_or_calls.should eql 1
+    @my_if_calls.should eql 1
+  end
+
+  it 'rewrites &&' do
+    do_rewrite(@symbolic_and_sexp, :symbolic_and, @operator_user)
+    @my_and_calls.should eql 1
+  end
 end
-
-
-  
-  
- 
-
-  #it 'should rewrite greet with if without else' do
-    ## We don't need to do anything special for if without else
-    ## They use the same sexp as if with else, with an empty block for the
-    ## else clause
-    #greeter_rewrite_should_work(@greet_if_without_else_sexp,
-                                #:greet_if_without_else)
-  #end
-
-  #it 'should rewrite greet with postfix if' do
-    ## Again, we don't need to do anything special - they turn into the same sexp
-    #greeter_rewrite_should_work(@greet_postfix_if_sexp, :greet_postfix_if)
-  #end
-
-  #it 'should rewrite greet with if then else on one line' do
-    #greeter_rewrite_should_work(@greet_if_then_else_sexp,
-                                #:greet_if_then_else)
-  #end
-
-  #it 'should rewrite greet with if then but no else on one line' do
-    #greeter_rewrite_should_work(@greet_if_then_no_else_sexp,
-                                #:greet_if_then_no_else)
-  #end
-
-  #it 'should rewrite greet with unless' do
-    #greeter_rewrite_should_work(@greet_unless_sexp, :greet_unless)    
-  #end
-
-  #it 'should rewrite greet with unless and else' do
-    #greeter_rewrite_should_work(@greet_unless_else_sexp, :greet_unless_else)
-  #end
-
-  #it 'should rewrite greet with postfix unless' do
-    #greeter_rewrite_should_work(@greet_postfix_unless_sexp,
-                                #:greet_postfix_unless)
-  #end
-
-  #it 'should combine ifs without interference' do
-    #greeter_rewrite_should_work(@greet_all_sexp, :greet_all, required_calls = 5)
-  #end
-
-  #it 'should handle nested ifs' do
-    #greeter_rewrite_should_work(@greet_nested_sexp, :greet_nested,
-                                #required_calls = 2)
-  #end
-
-  #it 'should rewrite "and" statements' do
-    #do_rewrite(@method_with_and_sexp, :method_with_and, @and_user)
-    #$my_and_calls.should eql 1
-  #end
-
-  #it 'should handle ifs with "and"s in the predicate' do
-    #do_rewrite(@if_with_and_sexp, :if_with_and, @and_user)
-    #$my_and_calls.should eql 1
-    #$my_if_calls.should eql 1
-  #end
-
-  #it 'should rewrite "or" statements' do
-    #do_rewrite(@method_with_or_sexp, :method_with_or, @or_user)
-    #$my_or_calls.should eql 1
-  #end
-
-  #it 'should handle ifs with "or"s in the predicate' do
-    #do_rewrite(@if_with_or_sexp, :if_with_or, @or_user)
-    #$my_or_calls.should eql 1
-    #$my_if_calls.should eql 1
-  #end
-
-  #it 'should rewrite &&' do
-    #do_rewrite(@symbolic_and_sexp, :symbolic_and, @operator_user)
-    #$my_and_calls.should eql 1
-  #end
-#end

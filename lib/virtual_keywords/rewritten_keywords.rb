@@ -35,6 +35,27 @@ module VirtualKeywords
       @objects_to_blocks[object_and_keyword] = a_lambda
     end
 
+    # Get the key in objects_to_blocks for the given input, or raise an
+    # exception if it's not there.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object part of the ObjectAndKeyword
+    #   keyword: (Symbol) they keyword part of the ObjectAndKeyword
+    #
+    # Raises:
+    #   RewriteLambdaNotProvided if the ObjectAndKeyword is not in
+    #   @objects_to_blocks
+    def key_or_raise(caller_object, keyword)
+      key = ObjectAndKeyword.new(caller_object, keyword)
+      if not @objects_to_blocks.include? key
+        raise RewriteLambdaNotProvided, 'A rewrite was requested for ' +
+            "#{caller_object}'s #{keyword} expressions, but there's no" +
+            'lambda for it.'
+      end
+
+      key
+    end
+
     # Call an if virtual block in place of an actual if statement.
     # This function locates the lambda registered with the given object.
     #
@@ -46,16 +67,25 @@ module VirtualKeywords
     #            the user-supplied block may do something else)
     #   else_do: (Proc) the lambda to execute if the condition is false (but
     #            the user-supplied block may do something else)
+    #
+    # Raises:
+    #   RewriteLambdaNotProvided if no if lambda is available.
     def call_if(caller_object, condition, then_do, else_do)
-      key = ObjectAndKeyword.new(caller_object, :if)
-      if not @objects_to_blocks.include? key
-        raise RewriteLambdaNotProvided, 'A rewrite was requested for ' +
-            "#{caller_object.to_s}'s if expressions, but there's no lambda " +
-            'for it.'
-      end
+      key = key_or_raise(caller_object, :if)
       @objects_to_blocks[key].call(condition, then_do, else_do)
     end
+
+    def call_and(caller_object, first, second)
+      key = key_or_raise(caller_object, :and)
+      @objects_to_blocks[key].call(first, second)
+    end
+
+    def call_or(caller_object, first, second)
+      key = key_or_raise(caller_object, :or)
+      @objects_to_blocks[key].call(first, second)
+    end
   end
+
 
   # The global instance of RewrittenKeywords that will be used.
   # I don't normally like using global variables, but in this case
