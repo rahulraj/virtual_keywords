@@ -6,8 +6,9 @@ require 'aquarium'
 require 'virtual_keywords/replacements'
 require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/class_mirrorer'
-require 'virtual_keywords/if_rewriter'
+require 'virtual_keywords/virtualizer'
 require 'virtual_keywords/keyword_rewriter'
+require 'virtual_keywords/rewritten_keywords'
 
 require 'rspec'
 
@@ -105,8 +106,9 @@ class Greeter < ApplicationController
 
   # What the conditional in greet should look like after processing
   def greet_changed
-    my_if(lambda { @hello }, lambda { 'Hello World!' },
-          lambda { 'Good' + 'bye' })
+    VirtualKeywords::REWRITTEN_KEYWORDS.call_if(
+        self, lambda { @hello }, lambda { 'Hello World! (if else)' },
+        lambda { 'Good' + 'bye (if else)' })
   end
 
   # All together now

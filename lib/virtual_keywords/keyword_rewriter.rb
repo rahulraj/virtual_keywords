@@ -6,8 +6,8 @@ module VirtualKeywords
       self.strict = false
     end
 
-    # Process calls this on every :if sexp. Returns a rewritten sexp.
-    # Based on the example from sexps_greet.txt
+    # Process calls this on every :if sexp. Returns a rewritten sexp,
+    # that calls VirtualKeywords::REWRITTEN_KEYWORDS.call_if
     def rewrite_if(expression)
       # The sexp for the condition passed to if is inside expression[1]
       # We can further process this sexp if it has and/or in it.
@@ -15,17 +15,16 @@ module VirtualKeywords
       then_do = expression[2]
       else_do = expression[3]
 
-      s(:fcall, :my_if,
+      s(:call,
+        s(:colon2,
+          s(:const, :VirtualKeywords),
+          :REWRITTEN_KEYWORDS
+        ), :call_if,
         s(:array,
-          s(:iter,
-            s(:fcall, :lambda), nil, condition
-          ),
-          s(:iter,
-            s(:fcall, :lambda), nil, then_do
-          ),
-          s(:iter,
-            s(:fcall, :lambda), nil, else_do
-          )
+          s(:self),
+          s(:iter, s(:fcall, :lambda), nil, condition),
+          s(:iter, s(:fcall, :lambda), nil, then_do),
+          s(:iter, s(:fcall, :lambda), nil, else_do)
         )
       )
     end
