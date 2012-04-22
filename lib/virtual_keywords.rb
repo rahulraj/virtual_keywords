@@ -1,6 +1,5 @@
 require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/replacements'
-require 'virtual_keywords/example_classes'
 require 'virtual_keywords/class_mirrorer'
 require 'virtual_keywords/keyword_rewriter'
 require 'virtual_keywords/if_rewriter'

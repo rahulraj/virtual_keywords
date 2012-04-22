@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+include VirtualKeywords::ClassReflection
+
 describe 'if_rewriter' do
   it 'retrieves the instance methods of a class' do
     method_names = instance_methods_of(Fizzbuzzer).keys

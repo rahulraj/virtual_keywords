@@ -4,50 +4,70 @@
 # Parent module containing all variables defined as part of virtual_keywords
 module VirtualKeywords
 
-  # Get the subclasses of a given class.
-  #
-  # Arguments:
-  #   parent: (Class) the class whose subclasses to find.
-  #
-  # Returns:
-  #   (Array) all classes which are subclasses of parent.
-  def subclasses_of_class(parent)
-    ObjectSpace.each_object(Class).select { |klass|
-      klass < parent
-    }
-  end
-
-  # Given an array of base classes, return a flat array of all their
-  # subclasses.
-  #
-  # Arguments:
-  #   klasses: (Array[Class]) an array of classes
-  #
-  # Returns:
-  #   (Array) All classes that are subclasses of one of the classes in klasses,
-  #           in a flattened array.
-  def subclasses_of_classes(klasses)
-    klasses.map { |klass|
-      subclasses_of_class klass
-    }.flatten
-  end
-
-  # Get the instance_methods of a class.
-  #
-  # Arguments:
-  #   klass: (Class) the class.
-  #
-  # Returns:
-  #   (Hash[Symbol, Array]) A hash, mapping method names to the results of
-  #                         ParseTree.translate.
-  def instance_methods_of(klass)
-    methods = {}
-    klass.instance_methods.each do |method_name|
-      translated = ParseTree.translate(klass, method_name)
-      methods[method_name] = translated
+  # Utility functions used to inspect the class hierarchy, and to view
+  # and modify methods of classes.
+  module ClassReflection
+    # Get the subclasses of a given class.
+    #
+    # Arguments:
+    #   parent: (Class) the class whose subclasses to find.
+    #
+    # Returns:
+    #   (Array) all classes which are subclasses of parent.
+    def subclasses_of_class(parent)
+      ObjectSpace.each_object(Class).select { |klass|
+        klass < parent
+      }
     end
 
-    methods
+    # Given an array of base classes, return a flat array of all their
+    # subclasses.
+    #
+    # Arguments:
+    #   klasses: (Array[Class]) an array of classes
+    #
+    # Returns:
+    #   (Array) All classes that are subclasses of one of the classes in klasses,
+    #           in a flattened array.
+    def subclasses_of_classes(klasses)
+      klasses.map { |klass|
+        subclasses_of_class klass
+      }.flatten
+    end
+
+    # Get the instance_methods of a class.
+    #
+    # Arguments:
+    #   klass: (Class) the class.
+    #
+    # Returns:
+    #   (Hash[Symbol, Array]) A hash, mapping method names to the results of
+    #                         ParseTree.translate.
+    def instance_methods_of(klass)
+      methods = {}
+      klass.instance_methods.each do |method_name|
+        translated = ParseTree.translate(klass, method_name)
+        methods[method_name] = translated
+      end
+
+      methods
+    end
+
+    # Install a method on a class. When object.method_name is called
+    # (for objects in the class), have them run the given code.
+    #
+    # Arguments:
+    #   klass: (Class) the class which should be modified.
+    #   method_name: (Symbol) the name of the method to add (possibly overwriting
+    #                an existing method)
+    #   code: (String) the code that will be called in the new method.
+    def install_method(klass, method_name, code)
+      klass.class_eval do
+        define_method(method_name) do
+          self.instance_eval code
+        end
+      end
+    end
   end
 
   # Deeply copy an array.
@@ -59,22 +79,6 @@ module VirtualKeywords
   #   (Array[A]) a deep copy of the original array.
   def deep_copy_array(array)
     Marshal.load(Marshal.dump(array))
-  end
-
-  # Install a method on a class. When object.method_name is called
-  # (for objects in the class), have them run the given code.
-  #
-  # Arguments:
-  #   klass: (Class) the class which should be modified.
-  #   method_name: (Symbol) the name of the method to add (possibly overwriting
-  #                an existing method)
-  #   code: (String) the code that will be called in the new method.
-  def install_method(klass, method_name, code)
-    klass.class_eval do
-      define_method(method_name) do
-        self.instance_eval code
-      end
-    end
   end
 
   # Object that virtualizes keywords.
