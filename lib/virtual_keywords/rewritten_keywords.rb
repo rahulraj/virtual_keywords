@@ -28,14 +28,20 @@ module VirtualKeywords
     # Register (save) a lambda to be called for a specific object.
     #
     # Arguments:
-    #   object_and_keyword: (ObjectAndKeyword) The data structure holding the
-    #                       object and keyword in question. In all methods of
-    #                       the object, the keyword will be replaced by the
-    #                       lambda.
+    #   object: (Object) the object whose methods will have their keyword
+    #           virtualized.
+    #   keyword: (Symbol) the keyword that will be virtualized
     #   a_lambda: (Proc) The lambda to be called in place of the keyword.
-    def register_lambda_for_object(object_and_keyword, a_lambda)
+    def register_lambda_for_object(object, keyword, a_lambda)
       predicate = lambda { |input|
-        input == object_and_keyword
+        input.object == object and input.keyword == keyword
+      }
+      @predicates_to_blocks[predicate] = a_lambda
+    end
+
+    def register_lambda_for_class(klass, keyword, a_lambda)
+      predicate = lambda { |input|
+        input.object.is_a?(klass) and input.keyword == keyword
       }
       @predicates_to_blocks[predicate] = a_lambda
     end
