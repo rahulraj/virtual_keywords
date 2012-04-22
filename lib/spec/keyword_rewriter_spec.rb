@@ -1,6 +1,6 @@
   require 'spec_helper'
 
-  describe 'if_processor' do
+  describe 'KeywordRewriter' do
 
     before :each do
       @sexp_processor = SexpProcessor.new
@@ -45,7 +45,7 @@
                                                :symbolic_and_result)
 
 
-    @if_processor = KeywordRewriter.new
+    @rewriter = KeywordRewriter.new
 
     # TODO Use mocking instead of global variables
     $my_if_calls = 0
@@ -98,7 +98,7 @@
   #end
 
   def do_rewrite(sexp, method_name, object, verbose = false)
-    result = @if_processor.process sexp
+    result = @rewriter.process sexp
     stringifier = SexpStringifier.new
 
     # Visually inspecting this result, it appears to be right
