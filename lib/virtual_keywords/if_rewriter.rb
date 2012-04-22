@@ -1,31 +1,45 @@
 #!/usr/bin/env ruby
 # I'm using Ruby 1.8.7
 
+# Parent module containing all variables defined as part of virtual_keywords
 module VirtualKeywords
 
-  # Get the descendant classes of a given class
+  # Get the subclasses of a given class.
   #
   # Arguments:
-  #   parent: (Class) the class whose descendants to find.
+  #   parent: (Class) the class whose subclasses to find.
   #
   # Returns:
   #   (Array) all classes which are subclasses of parent.
-  def descendants_of(parent)
+  def subclasses_of_class(parent)
     ObjectSpace.each_object(Class).select { |klass|
       klass < parent
     }
   end
 
-  # Given an array of base classes, return a flat array of all their subclasses
-  def subclasses_of(klasses)
+  # Given an array of base classes, return a flat array of all their
+  # subclasses.
+  #
+  # Arguments:
+  #   klasses: (Array[Class]) an array of classes
+  #
+  # Returns:
+  #   (Array) All classes that are subclasses of one of the classes in klasses,
+  #           in a flattened array.
+  def subclasses_of_classes(klasses)
     klasses.map { |klass|
-      descendants_of klass
+      descendants_of_class klass
     }.flatten
   end
 
-  # Get the instance_methods of a class
-  # Returns: A hash, mapping method names to results of ParseTree.translate
-  # (ParseTree.translate outputs a nested Array)
+  # Get the instance_methods of a class.
+  #
+  # Arguments:
+  #   klass: (Class) the class.
+  #
+  # Returns:
+  #   (Hash[Symbol, Array]) A hash, mapping method names to the results of
+  #                         ParseTree.translate.
   def instance_methods_of(klass)
     methods = {}
     klass.instance_methods.each do |method_name|
@@ -36,12 +50,25 @@ module VirtualKeywords
     methods
   end
 
-  # Deeply copy an array
-  # There's got to be a better way...
+  # Deeply copy an array.
+  #
+  # Arguments:
+  #   array: (Array[A]) the array to copy. A is any arbitrary type.
+  #
+  # Returns:
+  #   (Array[A]) a deep copy of the original array.
   def deep_copy_array(array)
     Marshal.load(Marshal.dump(array))
   end
 
+  # Install a method on a class. When object.method_name is called
+  # (for objects in the class), have them run the given code.
+  #
+  # Arguments:
+  #   klass: (Class) the class which should be modified.
+  #   method_name: (Symbol) the name of the method to add (possibly overwriting
+  #                an existing method)
+  #   code: (String) the code that will be called in the new method.
   def install_method(klass, method_name, code)
     klass.class_eval do
       define_method(method_name) do
@@ -50,12 +77,24 @@ module VirtualKeywords
     end
   end
 
+  # Object that virtualizes keywords.
   class Virtualizer
+    # Initialize a Virtualizer
+    # 
+    # Arguments:
+    #   keyword_rewriter: (IfProcessor) the SexpProcessor descendant that
+    #                     rewrites methods.
+    #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
+    #                   ParseTree results into sexps.
     def initialize(keyword_rewriter, sexp_processor)
       @keyword_rewriter = keyword_rewriter
       @sexp_processor = sexp_processor
     end
 
+    # Rewrite keywords in the methods of a class.
+    #
+    # Arguments:
+    #   klass: (Class) the class whose methods will be rewritten.
     def rewrite_keywords_on(klass)
       old_methods = instance_methods_of klass  
       old_methods.each do |name, translated|
@@ -71,7 +110,7 @@ module VirtualKeywords
   def main
     include Aquarium::Aspects
     rails_classes = [ActiveRecord::Base, ApplicationController]
-    to_intercept = subclasses_of rails_classes
+    to_intercept = subclasses_of_classes rails_classes
     processor = SexpProcessor.new
     if_rewriter = IfProcessor.new 
     mirrorer = new_class_mirrorer
