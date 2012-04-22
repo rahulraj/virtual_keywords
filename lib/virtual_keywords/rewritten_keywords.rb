@@ -39,9 +39,18 @@ module VirtualKeywords
       @predicates_to_blocks[predicate] = a_lambda
     end
 
+    # Register a lambda to be called for all objects created from a class.
+    # The predicate will match for all objects that are initialized with
+    # the class (but not if they are from subclasses)
+    #
+    # Arguments:
+    #   klass: (Class) the class whose objects will have their methods
+    #          virtualized.
+    #   keyword: (Symbol) the keyword that will be virtualized
+    #   a_lambda: (Proc) The lambda to be called in place of the keyword.
     def register_lambda_for_class(klass, keyword, a_lambda)
       predicate = lambda { |input|
-        input.object.is_a?(klass) and input.keyword == keyword
+        input.object.instance_of?(klass) and input.keyword == keyword
       }
       @predicates_to_blocks[predicate] = a_lambda
     end
