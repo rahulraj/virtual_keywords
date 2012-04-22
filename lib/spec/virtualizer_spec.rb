@@ -80,16 +80,35 @@ describe 'Virtualizer' do
 
     class MyClass
       def foo
+        if (2 + 2) == 4 and false
+          :tampered_and
+        else
+          :original
+        end
+      end
+
+      def bar
         if (2 + 2) == 4 or false        
           :original
         else
-          :someone_tampered_with_or
+          :tampered_or
         end
       end
     end
+
+    class AnotherClass
+      def quux
+        if true then :right else :if_modified end
+      end
+    end
     @my_class = MyClass.new
+    @another_class = AnotherClass.new
     @virtualizer = VirtualKeywords::Virtualizer.new(
-        :for_instances => [@greeter, @my_class])
+        :for_instances => [@greeter, @my_class]
+    )
+    @class_virtualizer = VirtualKeywords::Virtualizer.new(
+        :for_classes => [AnotherClass]
+    )
   end 
 
   it 'virtualizes "if" on instances' do
@@ -100,10 +119,29 @@ describe 'Virtualizer' do
     result.should eql :clobbered_if
   end
 
+  it 'virtualizes "and" on instances' do
+    @virtualizer.virtual_and do |first, second|
+      first.call or second.call
+    end
+    @my_class.foo.should eql :tampered_and
+  end
+
   it 'virtualizes "or" on instances' do
     @virtualizer.virtual_or do |first, second|
       first.call and second.call
     end
-    @my_class.foo.should eql :someone_tampered_with_or
+    @my_class.bar.should eql :tampered_or
+  end
+
+  it 'virtualizes "if" on classes' do
+    @class_virtualizer.virtual_if do |condition, then_do, else_do|
+      if not condition.call   
+        then_do.call
+      else
+        else_do.call
+      end
+    end  
+
+    @another_class.quux.should eql :if_modified
   end
 end

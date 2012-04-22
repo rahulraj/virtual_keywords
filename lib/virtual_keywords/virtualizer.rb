@@ -145,49 +145,61 @@ module VirtualKeywords
           input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
     end
 
+    def rewritten_code(translated, rewriter)
+      sexp = @sexp_processor.process(
+          VirtualKeywords.deep_copy_array(translated))
+      new_code = @sexp_stringifier.stringify(
+          rewriter.process(sexp))
+    end
+
+    def rewrite_methods_of_instance(instance, keyword, rewriter, block)
+      @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
+
+      methods = instance_methods_of instance.class
+      methods.each do |name, translated|
+        new_code = rewritten_code(translated, rewriter)
+        install_method_on_instance(instance, new_code)
+      end
+    end
+
+    def rewrite_methods_of_class(klass, keyword, rewriter, block)
+      @rewritten_keywords.register_lambda_for_class(klass, keyword, block)        
+
+      methods = instance_methods_of klass
+      methods.each do |name, translated|
+        new_code = rewritten_code(translated, rewriter)
+        install_method_on_class(klass, new_code)
+      end
+    end
+
     def virtual_if(&block)
       # Currently only for_instances is implemented
       @for_instances.each do |instance|
-        @rewritten_keywords.register_lambda_for_object(instance, :if, block)
-
-        methods = instance_methods_of instance.class
-        methods.each do |name, translated|
-          sexp = @sexp_processor.process(
-              VirtualKeywords.deep_copy_array(translated))
-          new_code = @sexp_stringifier.stringify(
-              @if_rewriter.process(sexp))
-          install_method_on_instance(instance, new_code)
-        end
+        rewrite_methods_of_instance(instance, :if, @if_rewriter, block)  
       end 
+
+      @for_classes.each do |klass|
+        rewrite_methods_of_class(klass, :if, @if_rewriter, block)
+      end
     end
 
     def virtual_and(&block)
       @for_instances.each do |instance|
-        @rewritten_keywords.register_lambda_for_object(instance, :and, block)
+        rewrite_methods_of_instance(instance, :and, @and_rewriter, block)
+      end
 
-        methods = instance_methods_of instance.class
-        methods.each do |name, translated|
-          sexp = @sexp_processor.process(
-              VirtualKeywords.deep_copy_array(translated))
-          new_code = @sexp_stringifier.stringify(
-              @and_rewriter.process(sexp))
-          install_method_on_instance(instance, new_code)
-        end
+      @for_classes.each do |klass|
+        rewrite_methods_of_class(klass, :and, @and_rewriter, block)
       end
     end
 
     def virtual_or(&block)
       @for_instances.each do |instance|
-        @rewritten_keywords.register_lambda_for_object(instance, :or, block)
+        rewrite_methods_of_instance(instance, :or, @or_rewriter, block)
+      end
 
-        methods = instance_methods_of instance.class
-        methods.each do |name, translated|
-          sexp = @sexp_processor.process(
-              VirtualKeywords.deep_copy_array(translated))
-          new_code = @sexp_stringifier.stringify(
-              @or_rewriter.process(sexp))
-          install_method_on_instance(instance, new_code)
-        end
+      @for_classes.each do |klass|
+        rewrite_methods_of_class(klass, :or, @or_rewriter, block)
       end
     end
 
