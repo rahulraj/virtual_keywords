@@ -45,7 +45,7 @@ module VirtualKeywords
     #                         ParseTree.translate.
     def instance_methods_of(klass)
       methods = {}
-      klass.instance_methods.each do |method_name|
+      klass.instance_methods(false).each do |method_name|
         translated = ParseTree.translate(klass, method_name)
         methods[method_name] = translated
       end
@@ -85,7 +85,6 @@ module VirtualKeywords
     def install_method_on_instance(object, method_code)
       object.instance_eval method_code
     end
-
   end
 
   # Deeply copy an array.
@@ -95,7 +94,7 @@ module VirtualKeywords
   #
   # Returns:
   #   (Array[A]) a deep copy of the original array.
-  def deep_copy_array(array)
+  def self.deep_copy_array(array)
     Marshal.load(Marshal.dump(array))
   end
 
@@ -104,6 +103,7 @@ module VirtualKeywords
     # Initialize a Virtualizer
     # 
     # Arguments:
+    #   A Hash with the following arguments (all optional):
     #   for_classes: (Array[Class]) an array of classes. All methods of objects
     #                created from the given classes will be virtualized
     #                (optional, the default is an empty Array).
@@ -114,9 +114,15 @@ module VirtualKeywords
     #                      objects created from the given classes' subclasses
     #                      (but NOT those from the given classes) will be
     #                      virtualized.
-    #   keyword_rewriter: (KeywordRewriter) the SexpProcessor descendant that
-    #                     rewrites methods (optional, the default is
-    #                     KeywordRewriter.new).
+    #   if_rewriter: (IfRewriter) the SexpProcessor descendant that
+    #                rewrites "if"s in methods (optional, the default is
+    #                IfRewriter.new).
+    #   and_rewriter: (AndRewriter) the SexpProcessor descendant that
+    #                 rewrites "and"s in methods (optional, the default is
+    #                 AndRewriter.new).
+    #   or_rewriter: (OrRewriter) the SexpProcessor descendant that
+    #                 rewrites "or"s in methods (optional, the default is
+    #                 OrRewriter.new).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
     #                   ParseTree results into sexps (optional, the default is
     #                   SexpProcessor.new).
@@ -126,39 +132,81 @@ module VirtualKeywords
     #   rewritten_keywords: (RewrittenKeywords) a repository for keyword
     #                       replacement lambdas (optional, the default is
     #                       REWRITTEN_KEYWORDS).
-    def initialize(for_classes = [],
-                   for_instances = [],
-                   for_subclasses_of = [],
-                   keyword_rewriter = KeywordRewriter.new,
-                   sexp_processor = SexpProcessor.new,
-                   sexp_stringifier = SexpStringifier.new,
-                   rewritten_keywords = REWRITTEN_KEYWORDS)
-      @for_classes = for_classes
-      @for_instances = for_instances
-      @for_subclasses_of = for_subclasses_of
-      @keyword_rewriter = keyword_rewriter
-      @sexp_processor = sexp_processor
-      @sexp_stringifier = sexp_stringifier
-      @rewritten_keywords = rewritten_keywords
+    def initialize(input_hash)
+      @for_classes = input_hash[:for_classes] || []
+      @for_instances = input_hash[:for_instances] || []
+      @for_subclasses_of = input_hash[:for_subclasses_of] || []
+      @if_rewriter = input_hash[:if_rewriter] || IfRewriter.new
+      @and_rewriter = input_hash[:and_rewriter] || AndRewriter.new
+      @or_rewriter = input_hash[:or_rewriter] || OrRewriter.new
+      @sexp_processor = input_hash[:sexp_processor] || SexpProcessor.new
+      @sexp_stringifier = input_hash[:sexp_stringifier] || SexpStringifier.new
+      @rewritten_keywords =
+          input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
     end
 
-    def use_if(&block)
-      
+    def virtual_if(&block)
+      # Currently only for_instances is implemented
+      @for_instances.each do |instance|
+        instance_and_if = ObjectAndKeyword.new(instance, :if)  
+        @rewritten_keywords.register_lambda(instance_and_if, block)
+
+        methods = instance_methods_of instance.class
+        methods.each do |name, translated|
+          sexp = @sexp_processor.process(
+              VirtualKeywords.deep_copy_array(translated))
+          new_code = @sexp_stringifier.stringify(
+              @if_rewriter.process(sexp))
+          install_method_on_instance(instance, new_code)
+        end
+      end 
+    end
+
+    def virtual_and(&block)
+      @for_instances.each do |instance|
+        instance_and_and = ObjectAndKeyword.new(instance, :and)
+        @rewritten_keywords.register_lambda(instance_and_and, block)
+
+        methods = instance_methods_of instance.class
+        methods.each do |name, translated|
+          sexp = @sexp_processor.process(
+              VirtualKeywords.deep_copy_array(translated))
+          new_code = @sexp_stringifier.stringify(
+              @and_rewriter.process(sexp))
+          install_method_on_instance(instance, new_code)
+        end
+      end
+    end
+
+    def virtual_or(&block)
+      @for_instances.each do |instance|
+        instance_and_or = ObjectAndKeyword.new(instance, :or)
+        @rewritten_keywords.register_lambda(instance_and_or, block)
+
+        methods = instance_methods_of instance.class
+        methods.each do |name, translated|
+          sexp = @sexp_processor.process(
+              VirtualKeywords.deep_copy_array(translated))
+          new_code = @sexp_stringifier.stringify(
+              @or_rewriter.process(sexp))
+          install_method_on_instance(instance, new_code)
+        end
+      end
     end
 
     # Rewrite keywords in the methods of a class.
     #
     # Arguments:
     #   klass: (Class) the class whose methods will be rewritten.
-    def rewrite_keywords_on(klass)
-      old_methods = instance_methods_of klass  
-      old_methods.each do |name, translated|
-        sexp = sexp_processor.process(deep_copy_array(translated))
-        rewritten_sexp = @keyword_rewriter.process sexp
+    #def rewrite_keywords_on(klass)
+      #old_methods = instance_methods_of klass  
+      #old_methods.each do |name, translated|
+        #sexp = @sexp_processor.process(deep_copy_array(translated))
+        #rewritten_sexp = @keyword_rewriter.process sexp
 
-        install_method(klass, name, @sexp_stringifier.stringify(rewritten_sexp))
-      end
-    end
+        #install_method_on_class(klass, name, @sexp_stringifier.stringify(rewritten_sexp))
+      #end
+    #end
   end
 
 

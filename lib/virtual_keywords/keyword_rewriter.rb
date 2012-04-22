@@ -1,8 +1,6 @@
 module VirtualKeywords
-  # Class that rewrites keywords in a given sexp.
-  # Usage: create a new KeywordRewriter, then call process on a Sexp
-  class KeywordRewriter < SexpProcessor
-    # Initialize a KeywordRewriter (self.strict is false)
+  class IfRewriter < SexpProcessor
+    # Initialize an IfRewriter (self.strict is false)
     def initialize
       super
       self.strict = false
@@ -40,29 +38,36 @@ module VirtualKeywords
         )
       )
     end
+  end
 
-    # Helper method. Call a 2-argument function used to replace an operator
-    # (like "and" or "or")
-    #
-    # Arguments:
-    #   method_name: (Symbol) the name of the REWRITTEN_KEYWORDS method that
-    #                should be called in the sexp.
-    #   first: (Sexp) the first argument to the method, which should be
-    #          wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
-    #   second: (Sexp) the second argument to the method, which should be
-    #            wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
-    def call_operator_replacement(function_name, first, second)
-      s(:call,
-        s(:colon2,
-          s(:const, :VirtualKeywords),
-          :REWRITTEN_KEYWORDS
-        ), function_name,
-        s(:array,
-          s(:self),
-          s(:iter, s(:fcall, :lambda), nil, first),
-          s(:iter, s(:fcall, :lambda), nil, second)
-        )
+  # Helper method. Call a 2-argument function used to replace an operator
+  # (like "and" or "or")
+  #
+  # Arguments:
+  #   method_name: (Symbol) the name of the REWRITTEN_KEYWORDS method that
+  #                should be called in the sexp.
+  #   first: (Sexp) the first argument to the method, which should be
+  #          wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
+  #   second: (Sexp) the second argument to the method, which should be
+  #            wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
+  def self.call_operator_replacement(function_name, first, second)
+    s(:call,
+      s(:colon2,
+        s(:const, :VirtualKeywords),
+        :REWRITTEN_KEYWORDS
+      ), function_name,
+      s(:array,
+        s(:self),
+        s(:iter, s(:fcall, :lambda), nil, first),
+        s(:iter, s(:fcall, :lambda), nil, second)
       )
+    )
+  end
+
+  class AndRewriter < SexpProcessor
+    def initialize
+      super
+      self.strict = false
     end
 
     # Rewrite "and" expressions (automatically called by SexpProcessor#process)
@@ -76,9 +81,16 @@ module VirtualKeywords
       first = expression[1]
       second = expression[2]
 
-      call_operator_replacement(:call_and, first, second)
+      VirtualKeywords.call_operator_replacement(:call_and, first, second)
     end
+  end
 
+  class OrRewriter < SexpProcessor
+    def initialize
+      super
+      self.strict = false
+    end
+  
     # Rewrite "or" expressions (automatically called by SexpProcessor#process)
     #
     # Arguments:
@@ -90,7 +102,7 @@ module VirtualKeywords
       first = expression[1]
       second = expression[2]
 
-      call_operator_replacement(:call_or, first, second)
+      VirtualKeywords.call_operator_replacement(:call_or, first, second)
     end
   end
 end

@@ -42,7 +42,9 @@ describe 'KeywordRewriter' do
                                                :symbolic_and_result)
 
 
-    @rewriter = VirtualKeywords::KeywordRewriter.new
+    @if_rewriter = VirtualKeywords::IfRewriter.new
+    @and_rewriter = VirtualKeywords::AndRewriter.new
+    @or_rewriter = VirtualKeywords::OrRewriter.new
 
     @my_if_calls = 0
     def increment_my_if_calls
@@ -147,7 +149,9 @@ describe 'KeywordRewriter' do
   #end
   #
   def do_rewrite(sexp, method_name, object, verbose = false)
-    result = @rewriter.process sexp
+    result1 = @if_rewriter.process sexp
+    result2 = @and_rewriter.process result1
+    result = @or_rewriter.process result2
     stringifier = VirtualKeywords::SexpStringifier.new
 
     # Visually inspecting this result, it appears to be right
@@ -168,7 +172,7 @@ describe 'KeywordRewriter' do
 
   def greeter_rewrite_should_work(sexp, method_name,
                                   required_calls = 1, verbose = false)
-    do_rewrite(sexp, method_name, @greeter, verbose)
+    do_rewrite(sexp, method_name, @greeter, verbose = verbose)
     @my_if_calls.should eql required_calls
   end
 

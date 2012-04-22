@@ -73,3 +73,37 @@ describe 'install_method_on_instance' do
     @object2.foo.should eql :hello
   end
 end
+
+describe 'Virtualizer' do
+  before :each do
+    @greeter = Greeter.new false
+
+    class MyClass
+      def foo
+        if (2 + 2) == 4 or false        
+          :original
+        else
+          :someone_tampered_with_or
+        end
+      end
+    end
+    @my_class = MyClass.new
+    @virtualizer = VirtualKeywords::Virtualizer.new(
+        :for_instances => [@greeter, @my_class])
+  end 
+
+  it 'virtualizes "if" on instances' do
+    @virtualizer.virtual_if do |condition, then_do, else_do|
+      :clobbered_if 
+    end
+    result = @greeter.greet_if_else
+    result.should eql :clobbered_if
+  end
+
+  it 'virtualizes "or" on instances' do
+    @virtualizer.virtual_or do |first, second|
+      first.call and second.call
+    end
+    @my_class.foo.should eql :someone_tampered_with_or
+  end
+end
