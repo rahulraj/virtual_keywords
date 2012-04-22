@@ -83,12 +83,13 @@ module VirtualKeywords
     # 
     # Arguments:
     #   keyword_rewriter: (KeywordRewriter) the SexpProcessor descendant that
-    #                     rewrites methods.
+    #                     rewrites methods (optional).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
-    #                   ParseTree results into sexps.
+    #                   ParseTree results into sexps (optional).
     #   sexp_stringifier: (SexpStringifier) an object that can turn sexps
-    #                     back into Ruby code (optional)
-    def initialize(keyword_rewriter, sexp_processor,
+    #                     back into Ruby code (optional).
+    def initialize(keyword_rewriter = KeywordRewriter.new,
+                   sexp_processor = SexpProcessor.new,
                    sexp_stringifier = SexpStringifier.new)
       @keyword_rewriter = keyword_rewriter
       @sexp_processor = sexp_processor
