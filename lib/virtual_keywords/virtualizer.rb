@@ -172,52 +172,33 @@ module VirtualKeywords
       end
     end
 
-    def virtual_if(&block)
-      # Currently only for_instances is implemented
+    def virtualize_keyword(keyword, rewriter, block)
       @for_instances.each do |instance|
-        rewrite_methods_of_instance(instance, :if, @if_rewriter, block)  
+        rewrite_methods_of_instance(instance, keyword, rewriter, block)  
       end 
 
       @for_classes.each do |klass|
-        rewrite_methods_of_class(klass, :if, @if_rewriter, block)
+        rewrite_methods_of_class(klass, keyword, rewriter, block)
       end
+
+      subclasses = ClassReflection::subclasses_of_classes @for_subclasses_of
+      subclasses.each do |subclass|
+        rewrite_methods_of_class(subclass, keyword, rewriter, block)
+      end
+    end
+
+    def virtual_if(&block)
+      virtualize_keyword(:if, @if_rewriter, block)
     end
 
     def virtual_and(&block)
-      @for_instances.each do |instance|
-        rewrite_methods_of_instance(instance, :and, @and_rewriter, block)
-      end
-
-      @for_classes.each do |klass|
-        rewrite_methods_of_class(klass, :and, @and_rewriter, block)
-      end
+      virtualize_keyword(:and, @and_rewriter, block)
     end
 
     def virtual_or(&block)
-      @for_instances.each do |instance|
-        rewrite_methods_of_instance(instance, :or, @or_rewriter, block)
-      end
-
-      @for_classes.each do |klass|
-        rewrite_methods_of_class(klass, :or, @or_rewriter, block)
-      end
+      virtualize_keyword(:or, @or_rewriter, block)
     end
-
-    # Rewrite keywords in the methods of a class.
-    #
-    # Arguments:
-    #   klass: (Class) the class whose methods will be rewritten.
-    #def rewrite_keywords_on(klass)
-      #old_methods = instance_methods_of klass  
-      #old_methods.each do |name, translated|
-        #sexp = @sexp_processor.process(deep_copy_array(translated))
-        #rewritten_sexp = @keyword_rewriter.process sexp
-
-        #install_method_on_class(klass, name, @sexp_stringifier.stringify(rewritten_sexp))
-      #end
-    #end
   end
-
 
   def main
     include Aquarium::Aspects

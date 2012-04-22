@@ -101,13 +101,24 @@ describe 'Virtualizer' do
         if true then :right else :if_modified end
       end
     end
+
+    class YetAnotherClass < AnotherClass
+      def quux
+        if false then :if_modified else :right end
+      end
+    end
+
     @my_class = MyClass.new
     @another_class = AnotherClass.new
+    @yet_another_class = YetAnotherClass.new
     @virtualizer = VirtualKeywords::Virtualizer.new(
         :for_instances => [@greeter, @my_class]
     )
     @class_virtualizer = VirtualKeywords::Virtualizer.new(
         :for_classes => [AnotherClass]
+    )
+    @subclass_virtualizer = VirtualKeywords::Virtualizer.new(
+        :for_subclasses_of => [AnotherClass]
     )
   end 
 
@@ -143,5 +154,18 @@ describe 'Virtualizer' do
     end  
 
     @another_class.quux.should eql :if_modified
+  end
+
+  it 'virtualizes "if" on subclasses of given classes' do
+    @subclass_virtualizer.virtual_if do |condition, then_do, else_do|
+      if not condition.call   
+        then_do.call
+      else
+        else_do.call
+      end
+    end  
+    
+    @another_class.quux.should eql :right
+    @yet_another_class.quux.should eql :if_modified
   end
 end
