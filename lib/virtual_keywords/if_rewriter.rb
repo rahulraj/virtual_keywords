@@ -1,21 +1,18 @@
 #!/usr/bin/env ruby
 # I'm using Ruby 1.8.7
 
-# Patch in a way to get the descendants of a class
-# TODO Eliminate namespace pollution
-class Class
-  def descendants
+module VirtualKeywords
+
+  def descendants_of(parent)
     result = []
-    ObjectSpace.each_object(Class) { |klass| result << klass if klass < self }
+    ObjectSpace.each_object(Class) { |klass| result << klass if klass < parent }
     result
   end
-end
 
-module VirtualKeywords
   # Given an array of base classes, return a flat array of all their subclasses
   def subclasses_of(klasses)
     klasses.map { |klass|
-      klass.descendants
+      descendants_of klass
     }.flatten
   end
 
