@@ -5,7 +5,7 @@ require 'virtual_keywords/class_mirrorer'
 require 'virtual_keywords/if_processor'
 require 'virtual_keywords/if_rewriter'
 
-class VirtualKeywords
+class VirtualKeywordsMain
   def self.main
     main()
   end

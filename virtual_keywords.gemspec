@@ -10,7 +10,8 @@ Gem::Specification.new do |specification|
       'functions, for DSLs'
   specification.authors = ['Rahul Rajagopalan']
   specification.email = 'rahulrajago@gmail.com'
-  specification.files  = ["lib/virtual_keywords.rb"]
+  #specification.files  = ["lib/virtual_keywords.rb"]
+  specification.files = Dir.glob("{bin,lib}/**/*")
   specification.homepage = 'http://github.com/rahulraj/virtual_keywords'
   
   specification.add_development_dependency "rspec"
