@@ -3,6 +3,13 @@
 
 module VirtualKeywords
 
+  # Get the descendant classes of a given class
+  #
+  # Arguments:
+  #   parent: (Class) the class whose descendants to find.
+  #
+  # Returns:
+  #   (Array) all classes which are subclasses of parent.
   def descendants_of(parent)
     ObjectSpace.each_object(Class).select { |klass|
       klass < parent
@@ -31,9 +38,35 @@ module VirtualKeywords
 
   # Deeply copy an array
   # There's got to be a better way...
-  def deep_copy_of_array(array)
+  def deep_copy_array(array)
     Marshal.load(Marshal.dump(array))
   end
+
+  def install_method(klass, method_name, code)
+    klass.class_eval do
+      define_method(method_name) do
+        self.instance_eval code
+      end
+    end
+  end
+
+  class Virtualizer
+    def initialize(keyword_rewriter, sexp_processor)
+      @keyword_rewriter = keyword_rewriter
+      @sexp_processor = sexp_processor
+    end
+
+    def rewrite_keywords_on(klass)
+      old_methods = instance_methods_of klass  
+      old_methods.each do |name, translated|
+        sexp = sexp_processor.process(deep_copy_array(translated))
+        rewritten_sexp = @keyword_rewriter.process sexp
+
+        install_method(klass, name, sexp_to_string(rewritten_sexp)) 
+      end
+    end
+  end
+
 
   def main
     include Aquarium::Aspects
@@ -67,7 +100,7 @@ module VirtualKeywords
         # We need to copy arrays before feeding it to this method if we want
         # to keep them around.
         # This is supposed to be "process", not "process_and_eat_your_array"...
-        sexp = processor.process(deep_copy_of_array(translated))
+        sexp = processor.process(deep_copy_array(translated))
 
         # Do stuff with sexp...
         rewritten_sexp = if_rewriter.process sexp
