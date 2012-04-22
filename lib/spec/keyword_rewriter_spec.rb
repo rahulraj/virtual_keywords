@@ -80,28 +80,28 @@ describe 'KeywordRewriter' do
     }
   
     greeter_if = VirtualKeywords::ObjectAndKeyword.new(@greeter, :if)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         greeter_if, my_if)
     
     and_user_and = VirtualKeywords::ObjectAndKeyword.new(@and_user, :and)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         and_user_and, my_and)
 
     and_user_if = VirtualKeywords::ObjectAndKeyword.new(@and_user, :if)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         and_user_if, my_if)
 
     or_user_or = VirtualKeywords::ObjectAndKeyword.new(@or_user, :or)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         or_user_or, my_or)
 
     or_user_if = VirtualKeywords::ObjectAndKeyword.new(@or_user, :if)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         or_user_if, my_if)
 
     operator_user_and = VirtualKeywords::ObjectAndKeyword.new(
         @operator_user, :and)
-    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda(
+    VirtualKeywords::REWRITTEN_KEYWORDS.register_lambda_for_object(
         operator_user_and, my_and)
   end
 

@@ -149,7 +149,7 @@ module VirtualKeywords
       # Currently only for_instances is implemented
       @for_instances.each do |instance|
         instance_and_if = ObjectAndKeyword.new(instance, :if)  
-        @rewritten_keywords.register_lambda(instance_and_if, block)
+        @rewritten_keywords.register_lambda_for_object(instance_and_if, block)
 
         methods = instance_methods_of instance.class
         methods.each do |name, translated|
@@ -165,7 +165,7 @@ module VirtualKeywords
     def virtual_and(&block)
       @for_instances.each do |instance|
         instance_and_and = ObjectAndKeyword.new(instance, :and)
-        @rewritten_keywords.register_lambda(instance_and_and, block)
+        @rewritten_keywords.register_lambda_for_object(instance_and_and, block)
 
         methods = instance_methods_of instance.class
         methods.each do |name, translated|
@@ -181,7 +181,7 @@ module VirtualKeywords
     def virtual_or(&block)
       @for_instances.each do |instance|
         instance_and_or = ObjectAndKeyword.new(instance, :or)
-        @rewritten_keywords.register_lambda(instance_and_or, block)
+        @rewritten_keywords.register_lambda_for_object(instance_and_or, block)
 
         methods = instance_methods_of instance.class
         methods.each do |name, translated|

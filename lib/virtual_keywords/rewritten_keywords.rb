@@ -15,15 +15,17 @@ module VirtualKeywords
     # Initialize a RewrittenKeywords
     #
     # Arguments:
-    #   objects_to_blocks: (Hash[ObjectAndKeyword, Proc]) a hash mapping
-    #                      ObjectAndKeyword objects to the lambdas that should
-    #                      be called in place of the keyword in the object's
-    #                      methods (optional, an empty Hash is the default).
-    def initialize(objects_to_blocks = {})
-      @objects_to_blocks = objects_to_blocks
+    #   A Hash with the following key:
+    #   predicates_to_blocks: (Hash[Proc, Proc]) a hash mapping predicates that
+    #                         take ObjectAndKeywords and return true for matches
+    #                         to the lambdas that should be called in place of
+    #                         the keyword in the object's methods
+    #                         (optional, an empty Hash is the default).
+    def initialize(input)
+      @predicates_to_blocks = input[:predicates_to_blocks] || {}
     end
 
-    # Register (save) a lambda to be called for an object.
+    # Register (save) a lambda to be called for a specific object.
     #
     # Arguments:
     #   object_and_keyword: (ObjectAndKeyword) The data structure holding the
@@ -31,29 +33,40 @@ module VirtualKeywords
     #                       the object, the keyword will be replaced by the
     #                       lambda.
     #   a_lambda: (Proc) The lambda to be called in place of the keyword.
-    def register_lambda(object_and_keyword, a_lambda)
-      @objects_to_blocks[object_and_keyword] = a_lambda
+    def register_lambda_for_object(object_and_keyword, a_lambda)
+      predicate = lambda { |input|
+        input == object_and_keyword
+      }
+      @predicates_to_blocks[predicate] = a_lambda
     end
 
-    # Get the key in objects_to_blocks for the given input, or raise an
+    # Get the virtual lambda to call for the given input, or raise an
     # exception if it's not there.
     #
     # Arguments:
     #   caller_object: (Object) the object part of the ObjectAndKeyword
     #   keyword: (Symbol) they keyword part of the ObjectAndKeyword
     #
+    # Returns:
+    #   The lambda to call for that object's keyword, if the object and keyword
+    #   matched any of the predicates.
+    #
     # Raises:
-    #   RewriteLambdaNotProvided if the ObjectAndKeyword is not in
-    #   @objects_to_blocks
-    def key_or_raise(caller_object, keyword)
-      key = ObjectAndKeyword.new(caller_object, keyword)
-      if not @objects_to_blocks.include? key
+    #   RewriteLambdaNotProvided if no predicate returns true for
+    #   ObjectAndKeyword.
+    def lambda_or_raise(caller_object, keyword)
+      object_and_keyword = ObjectAndKeyword.new(caller_object, keyword)
+      matching = @predicates_to_blocks.keys.find { |predicate|
+        predicate.call(object_and_keyword)
+      }
+
+      if matching.nil?
         raise RewriteLambdaNotProvided, 'A rewrite was requested for ' +
             "#{caller_object}'s #{keyword} expressions, but there's no" +
             'lambda for it.'
       end
 
-      key
+      @predicates_to_blocks[matching]
     end
 
     # Call an if virtual block in place of an actual if expression.
@@ -71,8 +84,8 @@ module VirtualKeywords
     # Raises:
     #   RewriteLambdaNotProvided if no "if" lambda is available.
     def call_if(caller_object, condition, then_do, else_do)
-      key = key_or_raise(caller_object, :if)
-      @objects_to_blocks[key].call(condition, then_do, else_do)
+      if_lambda = lambda_or_raise(caller_object, :if)
+      if_lambda.call(condition, then_do, else_do)
     end
 
     # Call an "and" virtual block in place of an "and" expression.
@@ -85,8 +98,8 @@ module VirtualKeywords
     # Raises:
     #   RewriteLambdaNotProvided if no "and" lambda is available.
     def call_and(caller_object, first, second)
-      key = key_or_raise(caller_object, :and)
-      @objects_to_blocks[key].call(first, second)
+      and_lambda = lambda_or_raise(caller_object, :and)
+      and_lambda.call(first, second)
     end
 
     # Call an "or" virtual block in place of an "or" expression.
@@ -99,8 +112,8 @@ module VirtualKeywords
     # Raises:
     #   RewriteLambdaNotProvided if no "or" lambda is available.
     def call_or(caller_object, first, second)
-      key = key_or_raise(caller_object, :or)
-      @objects_to_blocks[key].call(first, second)
+      or_lambda = lambda_or_raise(caller_object, :or)
+      or_lambda.call(first, second)
     end
   end
 
@@ -109,5 +122,5 @@ module VirtualKeywords
   # I don't normally like using global variables, but in this case
   # we need a global point of access, because we can't always control the
   # scope in which methods are executed.
-  REWRITTEN_KEYWORDS = RewrittenKeywords.new
+  REWRITTEN_KEYWORDS = RewrittenKeywords.new({})
 end
