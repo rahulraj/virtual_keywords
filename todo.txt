@@ -1,3 +1,0 @@
-- Remove pollution of the global namespace
-- Document every class/function in a standard format
-- Allow users to specify what functions to call to replace the keywords
