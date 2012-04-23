@@ -38,7 +38,12 @@ extensible language with rich syntax. Currently, users can override "if",
 
 Usage
 -----
-First, require the gem:
+First, install the gem:
+```sh
+gem install virtual_keywords
+```
+
+Then, require it:
 ```ruby
 require 'virtual_keywords'
 ```
