@@ -62,7 +62,7 @@ Finally, provide alternate implementations of the keywords you want to replace.
 You can replace as many or as few of the keywords as you want.
 To rewrite "if" conditionals, write:
 ```ruby
-virtualizer.virtual if do |condition, then_do, else_do|
+virtualizer.virtual_if do |condition, then_do, else_do|
   # condition, then_do, and else_do are lambdas wrapping the condition of the
   # if statement, the clause to do if the condition is true, and the clause
   # to do if the condition is false (or a no-op if no else clase was provided)
