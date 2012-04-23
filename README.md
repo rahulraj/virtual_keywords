@@ -52,9 +52,9 @@ Next, specify what you want to virtualize. Create a Virtualizer object, passing
 it the objects whose methods you want to virtualize.
 ```ruby
 virtualizer = VirtualKeywords::Virtualizer.new(
-    for_instances => [foo, bar],
-    for_classes => [Baz],
-    for_subclasses_of => [ParentClass]
+    :for_instances => [foo, bar],
+    :for_classes => [Baz],
+    :for_subclasses_of => [ParentClass]
 )
 ```
 All three of these named parameters are optional. Objects passed through
