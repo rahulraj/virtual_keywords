@@ -51,6 +51,7 @@ virtualizer = VirtualKeywords::Virtualizer.new(
     for_classes => [Baz],
     for_subclasses_of => [ParentClass]
 )
+```
 All three of these named parameters are optional. Objects passed through
 for_instances will have all their methods virtualized. The for_classes array
 contains classes, and all objects created from the given classes will be
