@@ -157,7 +157,7 @@ describe 'KeywordRewriter' do
     # old and new code should produce the same result,
     # except that @my_*_calls is incremented
     old_result = object.send method_name
-    VirtualKeywords::install_method_on_instance(object, code_result)
+    VirtualKeywords::ClassReflection.install_method_on_instance(object, code_result)
     new_result = object.send method_name
 
     new_result.should eql old_result

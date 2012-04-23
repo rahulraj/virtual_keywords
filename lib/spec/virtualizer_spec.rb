@@ -1,10 +1,9 @@
 require 'spec_helper'
 
-include VirtualKeywords::ClassReflection
-
 describe 'instance_methods_of' do
   it 'retrieves the instance methods of a class' do
-    method_names = instance_methods_of(Fizzbuzzer).keys
+    method_names = VirtualKeywords::ClassReflection.instance_methods_of(
+        Fizzbuzzer).keys
     method_names.should include 'fizzbuzz'
   end
 end
@@ -12,7 +11,8 @@ end
 describe 'subclasses_of_classes' do
   it 'finds the subclasses of classes and flattens the result' do
     rails_classes = [ActiveRecord::Base, ApplicationController]
-    subclasses = subclasses_of_classes rails_classes
+    subclasses = VirtualKeywords::ClassReflection.
+        subclasses_of_classes rails_classes
 
     subclasses.should include Fizzbuzzer
     subclasses.should include Greeter
@@ -30,7 +30,8 @@ describe 'install_method_on_class' do
   end
   
   it 'installs methods on classes' do
-    install_method_on_class(MyClass, 'def foo; :goodbye; end')
+    VirtualKeywords::ClassReflection.install_method_on_class(
+        MyClass, 'def foo; :goodbye; end')
     @object.foo.should eql :goodbye
   end
 
@@ -40,8 +41,10 @@ describe 'install_method_on_class' do
         :hello
       end
     end
-    install_method_on_class(MyClass, 'def foo; @bar = :bar; :goodbye; end')
-    install_method_on_class(MyClass, 'def bar; @bar; end')
+    VirtualKeywords::ClassReflection.install_method_on_class(
+        MyClass, 'def foo; @bar = :bar; :goodbye; end')
+    VirtualKeywords::ClassReflection.install_method_on_class(
+        MyClass, 'def bar; @bar; end')
 
     @object.foo.should eql :goodbye
     @object.bar.should eql :bar
@@ -49,7 +52,8 @@ describe 'install_method_on_class' do
 
   it 'installs methods that mutate globals' do
     $thing = :old
-    install_method_on_class(MyClass, 'def foo; $thing = :new; end')
+    VirtualKeywords::ClassReflection.install_method_on_class(
+        MyClass, 'def foo; $thing = :new; end')
     
     @object.foo()
     $thing.should eql :new
@@ -68,7 +72,8 @@ describe 'install_method_on_instance' do
   end
 
   it 'installs methods on specific instances' do
-    install_method_on_instance(@object1, 'def foo; :goodbye; end')
+    VirtualKeywords::ClassReflection.install_method_on_instance(
+        @object1, 'def foo; :goodbye; end')
     @object1.foo.should eql :goodbye
     @object2.foo.should eql :hello
   end
@@ -111,6 +116,7 @@ describe 'Virtualizer' do
     @my_class = MyClass.new
     @another_class = AnotherClass.new
     @yet_another_class = YetAnotherClass.new
+    @operator_user = OperatorUser.new false
     @virtualizer = VirtualKeywords::Virtualizer.new(
         :for_instances => [@greeter, @my_class]
     )
@@ -119,6 +125,9 @@ describe 'Virtualizer' do
     )
     @subclass_virtualizer = VirtualKeywords::Virtualizer.new(
         :for_subclasses_of => [AnotherClass]
+    )
+    @rails_subclass_virtualizer = VirtualKeywords::Virtualizer.new(
+        :for_subclasses_of =>  [ActiveRecord::Base, ApplicationController]
     )
   end 
 
@@ -164,7 +173,8 @@ describe 'Virtualizer' do
         else_do.call
       end
     end  
-    
+
+    # AnotherClass shouldn't be modified, it's not a subclass of itself
     @another_class.quux.should eql :right
     @yet_another_class.quux.should eql :if_modified
   end

@@ -1,3 +1,4 @@
+require 'parse_tree'
 require 'ruby2ruby'
 
 module VirtualKeywords

@@ -1,9 +1,7 @@
 require 'sexp_processor'
 require 'parse_tree'
 require 'ruby2ruby'
-require 'aquarium'
 
-require 'virtual_keywords/replacements'
 require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/class_mirrorer'
 require 'virtual_keywords/virtualizer'
@@ -200,9 +198,6 @@ end
 
 # Ruby also lets you use the && and || operators
 # I think they have different precedence rules
-# TODO I see a possible issue here. If a user mixes the words with the operators
-# how will we handle their precedence?
-# Function application has a different precedence from operators
 class OperatorUser < ActiveRecord::Base
   def initialize(value)
     @value = value

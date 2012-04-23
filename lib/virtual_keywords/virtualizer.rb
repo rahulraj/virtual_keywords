@@ -1,12 +1,9 @@
-#!/usr/bin/env ruby
-# I'm using Ruby 1.8.7
-
 # Parent module containing all variables defined as part of virtual_keywords
 module VirtualKeywords
 
   # Utility functions used to inspect the class hierarchy, and to view
   # and modify methods of classes.
-  module ClassReflection
+  class ClassReflection
     # Get the subclasses of a given class.
     #
     # Arguments:
@@ -14,7 +11,7 @@ module VirtualKeywords
     #
     # Returns:
     #   (Array) all classes which are subclasses of parent.
-    def subclasses_of_class(parent)
+    def self.subclasses_of_class(parent)
       ObjectSpace.each_object(Class).select { |klass|
         klass < parent
       }
@@ -29,7 +26,7 @@ module VirtualKeywords
     # Returns:
     #   (Array) All classes that are subclasses of one of the classes in klasses,
     #           in a flattened array.
-    def subclasses_of_classes(klasses)
+    def self.subclasses_of_classes(klasses)
       klasses.map { |klass|
         subclasses_of_class klass
       }.flatten
@@ -43,7 +40,7 @@ module VirtualKeywords
     # Returns:
     #   (Hash[Symbol, Array]) A hash, mapping method names to the results of
     #                         ParseTree.translate.
-    def instance_methods_of(klass)
+    def self.instance_methods_of(klass)
       methods = {}
       klass.instance_methods(false).each do |method_name|
         translated = ParseTree.translate(klass, method_name)
@@ -64,7 +61,7 @@ module VirtualKeywords
     #                def method_name(args)
     #                  ...
     #                end
-    def install_method_on_class(klass, method_code)
+    def self.install_method_on_class(klass, method_code)
       klass.class_eval method_code
     end
 
@@ -82,7 +79,7 @@ module VirtualKeywords
     #                def method_name(args)
     #                  ...
     #                end
-    def install_method_on_instance(object, method_code)
+    def self.install_method_on_instance(object, method_code)
       object.instance_eval method_code
     end
   end
@@ -155,20 +152,20 @@ module VirtualKeywords
     def rewrite_methods_of_instance(instance, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
-      methods = instance_methods_of instance.class
+      methods = ClassReflection.instance_methods_of instance.class
       methods.each do |name, translated|
         new_code = rewritten_code(translated, rewriter)
-        install_method_on_instance(instance, new_code)
+        ClassReflection.install_method_on_instance(instance, new_code)
       end
     end
 
     def rewrite_methods_of_class(klass, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)        
 
-      methods = instance_methods_of klass
+      methods = ClassReflection.instance_methods_of klass
       methods.each do |name, translated|
         new_code = rewritten_code(translated, rewriter)
-        install_method_on_class(klass, new_code)
+        ClassReflection.install_method_on_class(klass, new_code)
       end
     end
 
@@ -181,7 +178,7 @@ module VirtualKeywords
         rewrite_methods_of_class(klass, keyword, rewriter, block)
       end
 
-      subclasses = ClassReflection::subclasses_of_classes @for_subclasses_of
+      subclasses = ClassReflection.subclasses_of_classes @for_subclasses_of
       subclasses.each do |subclass|
         rewrite_methods_of_class(subclass, keyword, rewriter, block)
       end
@@ -199,82 +196,4 @@ module VirtualKeywords
       virtualize_keyword(:or, @or_rewriter, block)
     end
   end
-
-  def main
-    include Aquarium::Aspects
-    rails_classes = [ActiveRecord::Base, ApplicationController]
-    to_intercept = subclasses_of_classes rails_classes
-    processor = SexpProcessor.new
-    if_rewriter = KeywordRewriter.new 
-    sexp_stringifier = SexpStringifier.new
-    mirrorer = new_class_mirrorer
-
-    # Aquarium changes the methods to advise them, so save them beforehand
-    mirrored_methods = mirrorer.call to_intercept
-
-    # Some thoughts on interception
-    # Removing method_options segfaults
-    # Changing Fizzbuzzer to Object causes it to not intercept Fizzbuzzer methods
-    # (so it's not covariant)
-    Aspect.new :around, :calls_to => :all_methods, :for_types => to_intercept,
-        :method_options => :exclude_ancestor_methods do |join_point, obj, *args|
-      begin
-        p "Entering: #{join_point.target_type.name}##{join_point.method_name}: args = #{args.inspect}"
-
-        method_name = join_point.method_name.to_s
-
-        # Save the Aquarium-modified method, we'll need it later
-        modified_method = ParseTree.translate(obj.class, method_name)
-
-        key = ClassAndMethodName.new(obj.class, method_name)
-        translated = mirrored_methods[key]
-
-        # GOTCHA: SexpProcessor#process turns its argument into an empty array
-        # We need to copy arrays before feeding it to this method if we want
-        # to keep them around.
-        # This is supposed to be "process", not "process_and_eat_your_array"...
-        sexp = processor.process(deep_copy_array(translated))
-
-        # Do stuff with sexp...
-        rewritten_sexp = if_rewriter.process sexp
-
-        code_again = sexp_stringifier.stringify rewritten_sexp
-
-        # Uncomment this if you want to check that it IS processing the code.
-        #puts code_again 
-        
-        # We need to "install" the modified method into the object
-        # This works, but clobbers the advice, so future calls don't get intercepted
-        obj.instance_eval code_again
-        # Then do this instead of join_point.proceed.
-        # Don't forget to save the result!
-        result = obj.send(method_name, *args)
-
-        # But this issue is fixable. Put the Aquarium method back in.
-        modified_sexp = processor.process modified_method
-        modified_code = sexp_stringifier.stringify modified_sexp
-        obj.instance_eval modified_code
-
-        # Finally, send the result of the method call through
-        result
-      ensure
-        p "Leaving:  #{join_point.target_type.name}##{join_point.method_name}: args = #{args.inspect}"
-      end
-    end
-
-    # All of the method calls on this object should be intercepted
-    fizzbuzzer = Fizzbuzzer.new
-    puts "fizzbuzz(5) is #{fizzbuzzer.fizzbuzz 5}"
-
-    puts "fizzbuzz(9) is #{fizzbuzzer.fizzbuzz 9}"
-
-    greeter = Greeter.new(true)
-    puts greeter.greet
-  end
-end
-
-# Run main() only if if_rewriter is executed with the ruby command, not
-# imported. Like "if __name__ == '__main__': " in Python
-if __FILE__ == $0
-  VirtualKeywords::main()
 end

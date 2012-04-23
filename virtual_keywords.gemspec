@@ -17,5 +17,4 @@ Gem::Specification.new do |specification|
   specification.add_runtime_dependency "sexp_processor"
   specification.add_runtime_dependency "ParseTree"
   specification.add_runtime_dependency "ruby2ruby"
-  specification.add_runtime_dependency "aquarium"
 end
