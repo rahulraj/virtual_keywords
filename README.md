@@ -76,7 +76,7 @@ virtualizer.virtual_if do |condition, then_do, else_do|
   # times as you want by executing the call method on them.
 
   # For example, this code makes a virtual "if" that's identical to a normal
-  * one:
+  # one:
   # if condition.call
   #  then_do.call
   # else
