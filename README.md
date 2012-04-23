@@ -60,7 +60,7 @@ objects created through their subclasses virtualized.
 
 Finally, provide alternate implementations of the keywords you want to replace.
 You can replace as many or as few of the keywords as you want.
-To rewrite "if" conditionals, I would write:
+To rewrite "if" conditionals, write:
 ```ruby
 virtualizer.virtual if do |condition, then_do, else_do|
   # condition, then_do, and else_do are lambdas wrapping the condition of the
