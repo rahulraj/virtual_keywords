@@ -27,7 +27,7 @@ end
 ```
 There currently isn't a way to override this. Ruby will evaluate condition, then
 evaluate either do_something() or do_something_else() depending on whether
-condition was true.
+condition was true, and you can't redefine this behavior.
 
 Smalltalk, Clojure, Scala, and a handful of other languages don't have this
 issue, so this limitation makes Ruby feel more cumbersome by comparison.
