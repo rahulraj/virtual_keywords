@@ -142,6 +142,13 @@ module VirtualKeywords
           input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
     end
 
+    # Helper method to rewrite code.
+    #
+    # Arguments:
+    #   translated: (Array) the output of ParseTree.translate on the original
+    #               code
+    #   rewriter: (SexpProcessor) the object that will rewrite the sexp, to
+    #             virtualize the keywords.
     def rewritten_code(translated, rewriter)
       sexp = @sexp_processor.process(
           VirtualKeywords.deep_copy_array(translated))
@@ -149,6 +156,13 @@ module VirtualKeywords
           rewriter.process(sexp))
     end
 
+    # Helper method to rewrite all methods of an object.
+    #
+    # Arguments:
+    #   instance: (Object) the object whose methods will be rewritten.
+    #   keyword: (Symbol) the keyword to virtualize.
+    #   rewriter: (SexpProcessor) the object that will do the rewriting.
+    #   block: (Proc) the lambda that will replace the keyword.
     def rewrite_methods_of_instance(instance, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
@@ -159,6 +173,13 @@ module VirtualKeywords
       end
     end
 
+    # Helper method to rewrite all methods of objects from a class.
+    #
+    # Arguments:
+    #   klass: (Class) the class whose methods will be rewritten.
+    #   keyword: (Symbol) the keyword to virtualize.
+    #   rewriter: (SexpProcessor) the object that will do the rewriting.
+    #   block: (Proc) the lambda that will replace the keyword.
     def rewrite_methods_of_class(klass, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)        
 
@@ -169,6 +190,12 @@ module VirtualKeywords
       end
     end
 
+    # Helper method to virtualize a keyword (rewrite with the given block)
+    #
+    # Arguments:
+    #   keyword: (Symbol) the keyword to virtualize.
+    #   rewriter: (SexpProcessor) the object that will do the rewriting.
+    #   block: (Proc) the lambda that will replace the keyword.
     def virtualize_keyword(keyword, rewriter, block)
       @for_instances.each do |instance|
         rewrite_methods_of_instance(instance, keyword, rewriter, block)  
@@ -184,14 +211,29 @@ module VirtualKeywords
       end
     end
 
+    # Rewrite "if" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "if"s in the objects being
+    #           virtualized
     def virtual_if(&block)
       virtualize_keyword(:if, @if_rewriter, block)
     end
 
+    # Rewrite "and" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "and"s in the objects being
+    #           virtualized
     def virtual_and(&block)
       virtualize_keyword(:and, @and_rewriter, block)
     end
 
+    # Rewrite "or" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "or"s in the objects being
+    #           virtualized
     def virtual_or(&block)
       virtualize_keyword(:or, @or_rewriter, block)
     end
