@@ -212,6 +212,44 @@ class OperatorUser < ActiveRecord::Base
   end
 end
 
+class WhileUser < ApplicationController
+  def initialize(value)
+    @value = value
+  end
+
+  def while_count_to_value
+    i = 0
+    counts = []
+    while i < value
+      foo = 9
+      counts << i
+    end
+
+    counts
+  end
+end
+
+class CaseWhenUser < ApplicationController
+  def initialize(value)
+    @value = value
+  end
+
+  def describe_value
+    case @value
+      when 1
+        :one
+      when 3..5
+        :three_to_five
+      when 7, 9
+        :seven_or_nine
+      when value * 10 < 90
+        :passes_multiplication_test
+      else
+        :something_else
+    end
+  end
+end
+
 RSpec.configure do |config|
   config.color_enabled = true
   config.formatter = 'documentation'

@@ -12,6 +12,8 @@ describe 'KeywordRewriter' do
     @and_user = AndUser.new false
     @or_user = OrUser.new true
     @operator_user = OperatorUser.new false
+    @while_user = WhileUser.new 5
+    @case_when_user = CaseWhenUser.new 6
 
     @greet_if_else_sexp = method_to_sexp(Greeter, :greet_if_else)
     @greet_if_without_else_sexp = method_to_sexp(Greeter,
@@ -41,6 +43,9 @@ describe 'KeywordRewriter' do
     @symbolic_and_result_sexp = method_to_sexp(OperatorUser,
                                                :symbolic_and_result)
 
+    @while_count_sexp = method_to_sexp(WhileUser, :while_count_to_value)
+
+    @describe_value_sexp = method_to_sexp(CaseWhenUser, :describe_value)
 
     @if_rewriter = VirtualKeywords::IfRewriter.new
     @and_rewriter = VirtualKeywords::AndRewriter.new
@@ -140,7 +145,15 @@ describe 'KeywordRewriter' do
     #p @symbolic_and_result_sexp
     #puts ''
   #end
-  #
+
+  #it 'turns a case-when into a sexp' do
+    #p @describe_value_sexp  
+  #end
+ 
+  it 'turns a while into a sexp' do
+    p @while_count_sexp
+  end
+
   def do_rewrite(sexp, method_name, object, verbose = false)
     result1 = @if_rewriter.process sexp
     result2 = @and_rewriter.process result1

@@ -1,0 +1,21 @@
+# Structure of a while
+# So the first eleemnt is the condition, and the second is the body, wrapped
+# in a :block
+
+s(:defn, :while_count_to_value,
+  s(:scope,
+    s(:block, s(:args),
+      s(:lasgn, :i, s(:lit, 0)),
+      s(:lasgn, :counts, s(:zarray)),
+      s(:while,
+        s(:call, s(:lvar, :i), :<, s(:array, s(:vcall, :value))),
+        s(:block,
+          s(:lasgn, :foo, s(:lit, 9)),
+          s(:call, s(:lvar, :counts), :<<, s(:array, s(:lvar, :i)))
+        ),
+        true
+      ),
+      s(:lvar, :counts)
+    )
+  )
+)
