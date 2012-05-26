@@ -25,6 +25,9 @@ module VirtualKeywords
       then_do = expression[2]
       else_do = expression[3]
 
+      # This ugly sexp turns into the following Ruby code:
+      # VirtualKeywords::REWRITTEN_KEYWORDS.call_if(
+      #     self, lambda { condition }, lambda { then_do }, lambda { else_do })
       s(:call,
         s(:colon2,
           s(:const, :VirtualKeywords),

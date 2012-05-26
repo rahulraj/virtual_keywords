@@ -250,7 +250,7 @@ class CaseWhenUser < ApplicationController
   end
 end
 
-RSpec.configure do |config|
-  config.color_enabled = true
-  config.formatter = 'documentation'
+RSpec.configure do |configuration|
+  configuration.color_enabled = true
+  configuration.formatter = 'documentation'
 end
