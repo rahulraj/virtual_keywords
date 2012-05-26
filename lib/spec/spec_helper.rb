@@ -215,17 +215,26 @@ end
 class WhileUser < ApplicationController
   def initialize(value)
     @value = value
+    @i = 0
+    @counts = []
   end
 
+  # TODO Compare the sexps of these two methods!
   def while_count_to_value
-    i = 0
-    counts = []
-    while i < value
-      foo = 9
-      counts << i
+    while @i < value
+      @counts << @i
+      @i += 1
     end
+  end
 
-    counts
+  def while_result
+    my_while(
+      lambda { @i < value },
+      lambda do
+        @counts << @i
+        @i += 1
+      end
+    )
   end
 end
 
