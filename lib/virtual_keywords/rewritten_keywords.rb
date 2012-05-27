@@ -72,7 +72,7 @@ module VirtualKeywords
     def lambda_or_raise(caller_object, keyword)
       object_and_keyword = ObjectAndKeyword.new(caller_object, keyword)
       matching = @predicates_to_blocks.keys.find { |predicate|
-        predicate.call(object_and_keyword)
+        predicate.call object_and_keyword
       }
 
       if matching.nil?
@@ -129,6 +129,21 @@ module VirtualKeywords
     def call_or(caller_object, first, second)
       or_lambda = lambda_or_raise(caller_object, :or)
       or_lambda.call(first, second)
+    end
+
+    # Call a "while" virtual block in place of an "while" expression.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object whose method this is being called in.
+    #   condition: (Proc) The condition of the while expression.
+    #   body: (Proc) The body of the while expression (which is normally
+    #       executed repeatedly)
+    #   
+    # Raises:
+    #   RewriteLambdaNotProvided if no "while" lambda is available.
+    def call_while(caller_object, condition, body)
+      while_lambda = lambda_or_raise(caller_object, :while)
+      while_lambda.call(condition, body)
     end
   end
 

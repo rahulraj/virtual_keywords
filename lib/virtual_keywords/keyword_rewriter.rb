@@ -1,4 +1,7 @@
 module VirtualKeywords
+  # SexpProcessor subclass that rewrites "if" expressions.
+  # Calls VirtualKeywords::REWRITTEN_KEYWORDS.call_if and lets it pick a
+  # virtual implementation.
   class IfRewriter < SexpProcessor
     # Initialize an IfRewriter (self.strict is false)
     def initialize
@@ -67,6 +70,7 @@ module VirtualKeywords
     )
   end
 
+  # SexpProcessor subclass that rewrites "and" expressions.
   class AndRewriter < SexpProcessor
     def initialize
       super
@@ -88,6 +92,7 @@ module VirtualKeywords
     end
   end
 
+  # SexpProcessor subclass that rewrites "or" expressions.
   class OrRewriter < SexpProcessor
     def initialize
       super
@@ -106,6 +111,41 @@ module VirtualKeywords
       second = expression[2]
 
       VirtualKeywords.call_operator_replacement(:call_or, first, second)
+    end
+  end
+
+  class UnexpectedSexp < StandardError
+  end
+
+  class WhileRewriter < SexpProcessor
+    def initialize
+      super
+      self.strict = false
+    end
+
+    def rewrite_while(expression)
+      condition = expression[1]
+      body = expression[2]
+      
+      # This was a true in the example I checked (in sexps_while.txt)
+      # but I'm not sure what it's for.
+      third = expression[3]
+      if third != true # Should be true, not just a truthy object
+        raise UnexpectedSexp, 'Expected true as the 3rd element in a while, ' +
+            "but got #{third}, this is probably a bug."
+      end
+
+      s(:call,
+        s(:colon2,
+          s(:const, :VirtualKeywords),
+          :REWRITTEN_KEYWORDS
+        ), :call_while,
+        s(:array,
+          s(:self),
+          s(:iter, s(:fcall, :lambda), nil, condition),
+          s(:iter, s(:fcall, :lambda), nil, body)
+        )
+      )
     end
   end
 end

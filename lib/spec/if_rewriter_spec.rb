@@ -67,4 +67,8 @@ describe 'IfRewriter' do
   it 'handles nested ifs' do
     greeter_rewrite_should_work(:greet_nested, required_calls = 2)
   end
+
+  it 'rewrites ifs with compound clauses' do
+    greeter_rewrite_should_work :greet_block
+  end
 end

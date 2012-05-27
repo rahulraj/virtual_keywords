@@ -2,10 +2,8 @@ require 'spec_helper'
 
 describe 'KeywordRewriter' do
   before :each do
-
-    @while_count_sexp = method_to_sexp(WhileUser, :while_count_to_value)
-
-
+    #@while_count_sexp = method_to_sexp(WhileUser, :while_count_to_value)
+    #@while_result_sexp = method_to_sexp(WhileUser, :while_result)
   end
 
   # These two "specs" produce sexps that I used to figure out how
@@ -55,7 +53,9 @@ describe 'KeywordRewriter' do
     #p @describe_value_sexp  
   #end
  
-  it 'turns a while into a sexp' do
-    p @while_count_sexp
-  end
+  #it 'turns a while into a sexp' do
+    #p @while_count_sexp
+    #puts ''
+    #p @while_result_sexp
+  #end
 end

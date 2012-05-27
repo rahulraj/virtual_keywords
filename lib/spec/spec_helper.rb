@@ -149,6 +149,20 @@ class Greeter < ApplicationController
     end
   end
 
+  def greet_block
+    # Multiple statements in the if/else clauses
+    if @hello
+      value = 5
+      value += 5
+
+      value
+    else
+      thing = 9
+
+      thing
+    end
+  end
+
   def count_to_ten
     [1..10].each do |index|
       puts index
@@ -219,12 +233,13 @@ class WhileUser < ApplicationController
     @counts = []
   end
 
-  # TODO Compare the sexps of these two methods!
   def while_count_to_value
-    while @i < value
+    while @i < @value
       @counts << @i
       @i += 1
     end
+
+    @counts
   end
 
   def while_result
@@ -324,6 +339,23 @@ module TrackOrs
     @my_or ||= lambda { |first, second|
       increment_my_or_calls
       first.call or second.call
+    }
+  end
+end
+
+module TrackWhiles
+  @my_while_calls = 0
+
+  def increment_my_while_calls
+    @my_while_calls += 1
+  end
+
+  def my_while
+    @my_while ||= lambda { |condition, body|
+      increment_my_while_calls
+      while condition.call
+        body.call
+      end
     }
   end
 end
