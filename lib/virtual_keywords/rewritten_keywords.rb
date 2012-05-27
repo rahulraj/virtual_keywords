@@ -154,6 +154,11 @@ module VirtualKeywords
       until_lambda = lambda_or_raise(caller_object, :until)
       until_lambda.call(condition, body)
     end
+
+    def call_not(caller_object, value)
+      not_lambda = lambda_or_raise(caller_object, :not)
+      not_lambda.call value
+    end
   end
 
 

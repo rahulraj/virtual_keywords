@@ -2,13 +2,13 @@ require 'spec_helper'
 
 describe 'KeywordRewriter' do
   before :each do
-    #@until = method_to_sexp(UntilUser, :until_count_to_value)
-    #@until_result = method_to_sexp(UntilUser, :until_result)
+    #@not = method_to_sexp(NotUser, :negate)
+    #@not_result = method_to_sexp(NotUser, :negate_result)
   end
 
-  it 'turns an until into a sexp' do
-    #p @until    
+  it 'turns a not into a sexp' do
+    #p @not    
     #puts ""
-    #p @until_result
+    #p @not_result
   end  
 end

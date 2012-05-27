@@ -114,6 +114,28 @@ module VirtualKeywords
     end
   end
 
+  class NotRewriter < SexpProcessor
+    def initialize
+      super
+      self.strict = false
+    end
+
+    def rewrite_not(expression)
+      value = expression[1]
+
+      s(:call,
+        s(:colon2,
+          s(:const, :VirtualKeywords),
+          :REWRITTEN_KEYWORDS
+        ), :call_not,
+        s(:array,
+          s(:self),
+          s(:iter, s(:fcall, :lambda), nil, value)
+        )
+      )
+    end
+  end
+
   class UnexpectedSexp < StandardError
   end
 

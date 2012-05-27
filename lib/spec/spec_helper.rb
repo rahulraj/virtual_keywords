@@ -15,6 +15,7 @@ require 'virtualizees/fizzbuzzer'
 require 'virtualizees/greeter'
 require 'virtualizees/and_user'
 require 'virtualizees/or_user'
+require 'virtualizees/not_user'
 require 'virtualizees/operator_user'
 require 'virtualizees/while_user'
 require 'virtualizees/until_user'
@@ -75,6 +76,17 @@ module TrackOrs
     @my_or ||= lambda do |first, second|
       @my_or_calls += 1
       first.call or second.call
+    end
+  end
+end
+
+module TrackNots
+  @my_not_calls = 0
+
+  def my_not
+    @my_not ||= lambda do |value|
+      @my_not_calls += 1
+      not value.call
     end
   end
 end
