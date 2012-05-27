@@ -217,11 +217,13 @@ describe 'Virtualizer' do
 
   it 'virtualizes "until" on instances' do
     @virtualizer.virtual_until do |condition, body|
-      # call the body once, regardless of condition
-      body.call      
+      # flip it into a while
+      while condition.call
+        body.call
+      end
     end
     
     result = @until_counter.run
-    result.should eql [0]
+    result.should eql []
   end
 end
