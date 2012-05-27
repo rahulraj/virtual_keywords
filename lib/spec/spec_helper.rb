@@ -102,13 +102,6 @@ class Greeter < ApplicationController
     'Goodbye (postfix unless)' unless @hello
   end
 
-  # What the conditional in greet should look like after processing
-  def greet_changed
-    VirtualKeywords::REWRITTEN_KEYWORDS.call_if(
-        self, lambda { @hello }, lambda { 'Hello World! (if else)' },
-        lambda { 'Good' + 'bye (if else)' })
-  end
-
   # All together now
   def greet_all
     result = ''
@@ -241,15 +234,33 @@ class WhileUser < ApplicationController
 
     @counts
   end
+end
 
-  def while_result
-    my_while(
-      lambda { @i < value },
-      lambda do
-        @counts << @i
-        @i += 1
-      end
+class UntilUser
+  def initialize(value)
+    @value = value
+    @i = 0
+    @counts = []
+  end
+
+  def until_count_to_value
+    until @i > @value
+      @counts << @i
+      @i += 1
+    end
+
+    @counts
+  end
+
+  def until_result
+    my_until(
+        lambda { @i > @value },
+        lambda do
+          @counts << @i
+          @i += 1
+        end
     )
+    @counts
   end
 end
 
