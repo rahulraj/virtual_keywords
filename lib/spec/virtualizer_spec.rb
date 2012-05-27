@@ -113,7 +113,7 @@ describe 'Virtualizer' do
       end
     end
 
-    class Counter
+    class WhileCounter
       def run
         a = []
         i = 0
@@ -125,13 +125,26 @@ describe 'Virtualizer' do
       end
     end
 
+    class UntilCounter
+      def run
+        a = []
+        i = 0
+        until i > 10
+          a << i
+        end
+
+        a
+      end
+    end
+
     @my_class = MyClass.new
     @another_class = AnotherClass.new
     @yet_another_class = YetAnotherClass.new
     @operator_user = OperatorUser.new false
-    @counter = Counter.new
+    @while_counter = WhileCounter.new
+    @until_counter = UntilCounter.new
     @virtualizer = VirtualKeywords::Virtualizer.new(
-        :for_instances => [@greeter, @my_class, @counter]
+        :for_instances => [@greeter, @my_class, @while_counter, @until_counter]
     )
     @class_virtualizer = VirtualKeywords::Virtualizer.new(
         :for_classes => [AnotherClass]
@@ -198,7 +211,17 @@ describe 'Virtualizer' do
       body.call      
     end
 
-    result = @counter.run
+    result = @while_counter.run
+    result.should eql [0]
+  end
+
+  it 'virtualizes "until" on instances' do
+    @virtualizer.virtual_until do |condition, body|
+      # call the body once, regardless of condition
+      body.call      
+    end
+    
+    result = @until_counter.run
     result.should eql [0]
   end
 end

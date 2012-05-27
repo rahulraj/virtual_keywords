@@ -122,6 +122,9 @@ module VirtualKeywords
     #   while_rewriter: (WhileRewriter) the SexpProcessor descendant that
     #       rewrites "while"s in methods (optional, the default is
     #       WhileRewriter.new).
+    #   until_rewriter: (UntilRewriter) the SexpProcessor descendant that
+    #       rewrites "until"s in methods (optional, the default is
+    #       UntilRewriter.new).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
     #       ParseTree results into sexps (optional, the default is
     #       SexpProcessor.new).
@@ -140,6 +143,7 @@ module VirtualKeywords
       @and_rewriter = input_hash[:and_rewriter] || AndRewriter.new
       @or_rewriter = input_hash[:or_rewriter] || OrRewriter.new
       @while_rewriter = input_hash[:while_rewriter] || WhileRewriter.new
+      @until_rewriter = input_hash[:until_rewriter] || UntilRewriter.new
       @sexp_processor = input_hash[:sexp_processor] || SexpProcessor.new
       @sexp_stringifier = input_hash[:sexp_stringifier] || SexpStringifier.new
       @rewritten_keywords =
@@ -250,6 +254,10 @@ module VirtualKeywords
     #       virtualized
     def virtual_while(&block)
       virtualize_keyword(:while, @while_rewriter, block)
+    end
+
+    def virtual_until(&block)
+      virtualize_keyword(:until, @until_rewriter, block)
     end
   end
 end
