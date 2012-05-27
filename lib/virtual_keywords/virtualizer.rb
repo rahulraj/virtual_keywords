@@ -176,7 +176,7 @@ module VirtualKeywords
     #   keyword: (Symbol) the keyword to virtualize.
     #   rewriter: (SexpProcessor) the object that will do the rewriting.
     #   block: (Proc) the lambda that will replace the keyword.
-    def rewrite_methods_of_instance(instance, keyword, rewriter, block)
+    def rewrite_all_methods_of_instance(instance, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
       methods = @class_reflection.instance_methods_of instance.class
@@ -193,7 +193,7 @@ module VirtualKeywords
     #   keyword: (Symbol) the keyword to virtualize.
     #   rewriter: (SexpProcessor) the object that will do the rewriting.
     #   block: (Proc) the lambda that will replace the keyword.
-    def rewrite_methods_of_class(klass, keyword, rewriter, block)
+    def rewrite_all_methods_of_class(klass, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)
 
       methods = @class_reflection.instance_methods_of klass
@@ -211,16 +211,16 @@ module VirtualKeywords
     #   block: (Proc) the lambda that will replace the keyword.
     def virtualize_keyword(keyword, rewriter, block)
       @for_instances.each do |instance|
-        rewrite_methods_of_instance(instance, keyword, rewriter, block)  
+        rewrite_all_methods_of_instance(instance, keyword, rewriter, block)  
       end 
 
       @for_classes.each do |klass|
-        rewrite_methods_of_class(klass, keyword, rewriter, block)
+        rewrite_all_methods_of_class(klass, keyword, rewriter, block)
       end
 
       subclasses = @class_reflection.subclasses_of_classes @for_subclasses_of
       subclasses.each do |subclass|
-        rewrite_methods_of_class(subclass, keyword, rewriter, block)
+        rewrite_all_methods_of_class(subclass, keyword, rewriter, block)
       end
     end
 
