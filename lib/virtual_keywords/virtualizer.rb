@@ -130,6 +130,8 @@ module VirtualKeywords
     #       SexpStringifier.new).
     #   rewritten_keywords: (RewrittenKeywords) a repository for keyword
     #       replacement lambdas (optional, the default is REWRITTEN_KEYWORDS).
+    #   class_reflection: (Class) an object that provides methods to modify the
+    #       methods of classes (optional, the default is ClassReflection).
     def initialize(input_hash)
       @for_classes = input_hash[:for_classes] || []
       @for_instances = input_hash[:for_instances] || []
@@ -142,6 +144,7 @@ module VirtualKeywords
       @sexp_stringifier = input_hash[:sexp_stringifier] || SexpStringifier.new
       @rewritten_keywords =
           input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
+      @class_reflection = input_hash[:class_reflection] || ClassReflection
     end
 
     # Helper method to rewrite code.
@@ -168,10 +171,10 @@ module VirtualKeywords
     def rewrite_methods_of_instance(instance, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
-      methods = ClassReflection.instance_methods_of instance.class
+      methods = @class_reflection.instance_methods_of instance.class
       methods.each do |name, translated|
         new_code = rewritten_code(translated, rewriter)
-        ClassReflection.install_method_on_instance(instance, new_code)
+        @class_reflection.install_method_on_instance(instance, new_code)
       end
     end
 
@@ -185,10 +188,10 @@ module VirtualKeywords
     def rewrite_methods_of_class(klass, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)
 
-      methods = ClassReflection.instance_methods_of klass
+      methods = @class_reflection.instance_methods_of klass
       methods.each do |name, translated|
         new_code = rewritten_code(translated, rewriter)
-        ClassReflection.install_method_on_class(klass, new_code)
+        @class_reflection.install_method_on_class(klass, new_code)
       end
     end
 
@@ -207,7 +210,7 @@ module VirtualKeywords
         rewrite_methods_of_class(klass, keyword, rewriter, block)
       end
 
-      subclasses = ClassReflection.subclasses_of_classes @for_subclasses_of
+      subclasses = @class_reflection.subclasses_of_classes @for_subclasses_of
       subclasses.each do |subclass|
         rewrite_methods_of_class(subclass, keyword, rewriter, block)
       end
