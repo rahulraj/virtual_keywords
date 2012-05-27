@@ -137,14 +137,22 @@ describe 'Virtualizer' do
       end
     end
 
+    class Inverter
+      def run value
+        not value
+      end
+    end
+
     @my_class = MyClass.new
     @another_class = AnotherClass.new
     @yet_another_class = YetAnotherClass.new
     @operator_user = OperatorUser.new false
     @while_counter = WhileCounter.new
     @until_counter = UntilCounter.new
+    @inverter = Inverter.new
     @virtualizer = VirtualKeywords::Virtualizer.new(
-        :for_instances => [@greeter, @my_class, @while_counter, @until_counter]
+        :for_instances => [@greeter, @my_class,
+            @while_counter, @until_counter, @inverter]
     )
     @class_virtualizer = VirtualKeywords::Virtualizer.new(
         :for_classes => [AnotherClass]
@@ -225,5 +233,14 @@ describe 'Virtualizer' do
     
     result = @until_counter.run
     result.should eql []
+  end
+
+  it 'virtualizes "not" on instances' do
+    @virtualizer.virtual_not do |value|
+      value.call
+    end
+
+    result = @inverter.run true
+    result.should be_true
   end
 end

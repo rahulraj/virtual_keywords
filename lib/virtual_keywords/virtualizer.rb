@@ -119,6 +119,9 @@ module VirtualKeywords
     #   or_rewriter: (OrRewriter) the SexpProcessor descendant that
     #       rewrites "or"s in methods (optional, the default is
     #       OrRewriter.new).
+    #   not_rewriter: (NotRewriter) the SexpProcessor descendant that
+    #       rewrites "not"s in methods (optional, the default is
+    #       NotRewriter.new).
     #   while_rewriter: (WhileRewriter) the SexpProcessor descendant that
     #       rewrites "while"s in methods (optional, the default is
     #       WhileRewriter.new).
@@ -142,6 +145,7 @@ module VirtualKeywords
       @if_rewriter = input_hash[:if_rewriter] || IfRewriter.new
       @and_rewriter = input_hash[:and_rewriter] || AndRewriter.new
       @or_rewriter = input_hash[:or_rewriter] || OrRewriter.new
+      @not_rewriter = input_hash[:or_rewriter] || NotRewriter.new
       @while_rewriter = input_hash[:while_rewriter] || WhileRewriter.new
       @until_rewriter = input_hash[:until_rewriter] || UntilRewriter.new
       @sexp_processor = input_hash[:sexp_processor] || SexpProcessor.new
@@ -258,6 +262,10 @@ module VirtualKeywords
 
     def virtual_until(&block)
       virtualize_keyword(:until, @until_rewriter, block)
+    end
+
+    def virtual_not(&block)
+      virtualize_keyword(:not, @not_rewriter, block)
     end
   end
 end
