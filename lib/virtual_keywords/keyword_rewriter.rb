@@ -51,11 +51,11 @@ module VirtualKeywords
   #
   # Arguments:
   #   method_name: (Symbol) the name of the REWRITTEN_KEYWORDS method that
-  #                should be called in the sexp.
+  #       should be called in the sexp.
   #   first: (Sexp) the first argument to the method, which should be
-  #          wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
+  #       wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
   #   second: (Sexp) the second argument to the method, which should be
-  #            wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
+  #       wrapped in a lambda then passed to REWRITTEN_KEYWORDS. 
   def self.call_operator_replacement(function_name, first, second)
     s(:call,
       s(:colon2,

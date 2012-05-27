@@ -58,9 +58,9 @@ module VirtualKeywords
     # Arguments:
     #   klass: (Class) the class which should be modified.
     #   method_code: (String) the code for the method to install, of the format:
-    #                def method_name(args)
-    #                  ...
-    #                end
+    #       def method_name(args)
+    #         ...
+    #       end
     def self.install_method_on_class(klass, method_code)
       klass.class_eval method_code
     end
@@ -76,9 +76,9 @@ module VirtualKeywords
     # Arguments:
     #   object: (Object) the object instance that should be modified.
     #   method_code: (String) the code for the method to install, of the format:
-    #                def method_name(args)
-    #                  ...
-    #                end
+    #       def method_name(args)
+    #         ...
+    #       end
     def self.install_method_on_instance(object, method_code)
       object.instance_eval method_code
     end
@@ -102,36 +102,34 @@ module VirtualKeywords
     # Arguments:
     #   A Hash with the following arguments (all optional):
     #   for_classes: (Array[Class]) an array of classes. All methods of objects
-    #                created from the given classes will be virtualized
-    #                (optional, the default is an empty Array).
+    #       created from the given classes will be virtualized (optional, the
+    #       default is an empty Array).
     #   for_instances: (Array[Object]) an array of object. All of these objects'
-    #                  methods will be virtualized
-    #                  (optional, the default is an empty Array).
+    #       methods will be virtualized
+    #       (optional, the default is an empty Array).
     #   for subclasses_of: (Array[Class]) an array of classes. All methods of
-    #                      objects created from the given classes' subclasses
-    #                      (but NOT those from the given classes) will be
-    #                      virtualized.
+    #       objects created from the given classes' subclasses (but NOT those
+    #       from the given classes) will be virtualized.
     #   if_rewriter: (IfRewriter) the SexpProcessor descendant that
-    #                rewrites "if"s in methods (optional, the default is
-    #                IfRewriter.new).
+    #       rewrites "if"s in methods (optional, the default is
+    #       IfRewriter.new).
     #   and_rewriter: (AndRewriter) the SexpProcessor descendant that
-    #                 rewrites "and"s in methods (optional, the default is
-    #                 AndRewriter.new).
+    #       rewrites "and"s in methods (optional, the default is
+    #       AndRewriter.new).
     #   or_rewriter: (OrRewriter) the SexpProcessor descendant that
-    #                 rewrites "or"s in methods (optional, the default is
-    #                 OrRewriter.new).
+    #       rewrites "or"s in methods (optional, the default is
+    #       OrRewriter.new).
     #   while_rewriter: (WhileRewriter) the SexpProcessor descendant that
-    #                   rewrites "while"s in methods (optional, the default is
-    #                   WhileRewriter.new).
+    #       rewrites "while"s in methods (optional, the default is
+    #       WhileRewriter.new).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
-    #                   ParseTree results into sexps (optional, the default is
-    #                   SexpProcessor.new).
+    #       ParseTree results into sexps (optional, the default is
+    #       SexpProcessor.new).
     #   sexp_stringifier: (SexpStringifier) an object that can turn sexps
-    #                     back into Ruby code (optional, the default is
-    #                     SexpStringifier.new).
+    #       back into Ruby code (optional, the default is
+    #       SexpStringifier.new).
     #   rewritten_keywords: (RewrittenKeywords) a repository for keyword
-    #                       replacement lambdas (optional, the default is
-    #                       REWRITTEN_KEYWORDS).
+    #       replacement lambdas (optional, the default is REWRITTEN_KEYWORDS).
     def initialize(input_hash)
       @for_classes = input_hash[:for_classes] || []
       @for_instances = input_hash[:for_instances] || []
@@ -150,9 +148,9 @@ module VirtualKeywords
     #
     # Arguments:
     #   translated: (Array) the output of ParseTree.translate on the original
-    #               code
+    #       code
     #   rewriter: (SexpProcessor) the object that will rewrite the sexp, to
-    #             virtualize the keywords.
+    #       virtualize the keywords.
     def rewritten_code(translated, rewriter)
       sexp = @sexp_processor.process(
           VirtualKeywords.deep_copy_array(translated))
@@ -219,7 +217,7 @@ module VirtualKeywords
     #
     # Arguments:
     #   &block: The block that will replace "if"s in the objects being
-    #           virtualized
+    #       virtualized
     def virtual_if(&block)
       virtualize_keyword(:if, @if_rewriter, block)
     end
@@ -228,7 +226,7 @@ module VirtualKeywords
     #
     # Arguments:
     #   &block: The block that will replace "and"s in the objects being
-    #           virtualized
+    #       virtualized
     def virtual_and(&block)
       virtualize_keyword(:and, @and_rewriter, block)
     end
@@ -237,11 +235,16 @@ module VirtualKeywords
     #
     # Arguments:
     #   &block: The block that will replace "or"s in the objects being
-    #           virtualized
+    #       virtualized
     def virtual_or(&block)
       virtualize_keyword(:or, @or_rewriter, block)
     end
 
+    # Rewrite "while" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "while"s in the objects being
+    #       virtualized
     def virtual_while(&block)
       virtualize_keyword(:while, @while_rewriter, block)
     end

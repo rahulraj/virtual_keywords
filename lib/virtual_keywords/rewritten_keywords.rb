@@ -17,10 +17,9 @@ module VirtualKeywords
     # Arguments:
     #   A Hash with the following key:
     #   predicates_to_blocks: (Hash[Proc, Proc]) a hash mapping predicates that
-    #                         take ObjectAndKeywords and return true for matches
-    #                         to the lambdas that should be called in place of
-    #                         the keyword in the object's methods
-    #                         (optional, an empty Hash is the default).
+    #       take ObjectAndKeywords and return true for matches to the lambdas
+    #       that should be called in place of the keyword in the object's
+    #       methods (optional, an empty Hash is the default).
     def initialize(input)
       @predicates_to_blocks = input[:predicates_to_blocks] || {}
     end
@@ -90,11 +89,11 @@ module VirtualKeywords
     # Arguments:
     #   caller_object: (Object) the object whose method this is being called in.
     #   condition: (Proc) The condition of the if statement, wrapped in a
-    #              lambda.
+    #       lambda.
     #   then_do: (Proc) the lambda to execute if the condition is true (but
-    #            the user-supplied block may do something else)
+    #       the user-supplied block may do something else)
     #   else_do: (Proc) the lambda to execute if the condition is false (but
-    #            the user-supplied block may do something else)
+    #       the user-supplied block may do something else)
     #
     # Raises:
     #   RewriteLambdaNotProvided if no "if" lambda is available.
