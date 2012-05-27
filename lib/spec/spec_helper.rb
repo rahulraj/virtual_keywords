@@ -45,14 +45,14 @@ module TrackIfs
 
   def my_if
     # Dummy if that increments @my_if_calls, then runs as normal
-    @my_if ||= lambda { |condition, then_do, else_do|
+    @my_if ||= lambda do |condition, then_do, else_do|
       @my_if_calls += 1
       if condition.call 
         then_do.call
       else 
         else_do.call
       end
-    }
+    end
   end
 end
 
@@ -61,10 +61,10 @@ module TrackAnds
 
   def my_and
     # Dummy if that increments @my_if_calls, then runs as normal
-    @my_and ||= lambda { |first, second|
+    @my_and ||= lambda do |first, second|
       @my_and_calls += 1
       first.call and second.call
-    }
+    end
   end
 end
 
@@ -72,10 +72,10 @@ module TrackOrs
   @my_or_calls = 0
 
   def my_or
-    @my_or ||= lambda { |first, second|
+    @my_or ||= lambda do |first, second|
       @my_or_calls += 1
       first.call or second.call
-    }
+    end
   end
 end
 
@@ -83,12 +83,12 @@ module TrackWhiles
   @my_while_calls = 0
 
   def my_while
-    @my_while ||= lambda { |condition, body|
+    @my_while ||= lambda do |condition, body|
       @my_while_calls += 1
       while condition.call
         body.call
       end
-    }
+    end
   end
 end
 
@@ -96,12 +96,12 @@ module TrackUntils
   @my_until_calls = 0
 
   def my_until
-    @my_until ||= lambda { |condition, body|
+    @my_until ||= lambda do |condition, body|
       @my_until_calls += 1
       until condition.call
         body.call
       end
-    }
+    end
   end
 end
 
