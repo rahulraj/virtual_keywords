@@ -120,6 +120,9 @@ module VirtualKeywords
     #   or_rewriter: (OrRewriter) the SexpProcessor descendant that
     #                 rewrites "or"s in methods (optional, the default is
     #                 OrRewriter.new).
+    #   while_rewriter: (WhileRewriter) the SexpProcessor descendant that
+    #                   rewrites "while"s in methods (optional, the default is
+    #                   WhileRewriter.new).
     #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
     #                   ParseTree results into sexps (optional, the default is
     #                   SexpProcessor.new).
@@ -136,6 +139,7 @@ module VirtualKeywords
       @if_rewriter = input_hash[:if_rewriter] || IfRewriter.new
       @and_rewriter = input_hash[:and_rewriter] || AndRewriter.new
       @or_rewriter = input_hash[:or_rewriter] || OrRewriter.new
+      @while_rewriter = input_hash[:while_rewriter] || WhileRewriter.new
       @sexp_processor = input_hash[:sexp_processor] || SexpProcessor.new
       @sexp_stringifier = input_hash[:sexp_stringifier] || SexpStringifier.new
       @rewritten_keywords =
@@ -181,7 +185,7 @@ module VirtualKeywords
     #   rewriter: (SexpProcessor) the object that will do the rewriting.
     #   block: (Proc) the lambda that will replace the keyword.
     def rewrite_methods_of_class(klass, keyword, rewriter, block)
-      @rewritten_keywords.register_lambda_for_class(klass, keyword, block)        
+      @rewritten_keywords.register_lambda_for_class(klass, keyword, block)
 
       methods = ClassReflection.instance_methods_of klass
       methods.each do |name, translated|
@@ -236,6 +240,10 @@ module VirtualKeywords
     #           virtualized
     def virtual_or(&block)
       virtualize_keyword(:or, @or_rewriter, block)
+    end
+
+    def virtual_while(&block)
+      virtualize_keyword(:while, @while_rewriter, block)
     end
   end
 end

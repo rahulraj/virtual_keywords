@@ -113,12 +113,25 @@ describe 'Virtualizer' do
       end
     end
 
+    class Counter
+      def run
+        a = []
+        i = 0
+        while i <= 10
+          a << i
+        end
+
+        a
+      end
+    end
+
     @my_class = MyClass.new
     @another_class = AnotherClass.new
     @yet_another_class = YetAnotherClass.new
     @operator_user = OperatorUser.new false
+    @counter = Counter.new
     @virtualizer = VirtualKeywords::Virtualizer.new(
-        :for_instances => [@greeter, @my_class]
+        :for_instances => [@greeter, @my_class, @counter]
     )
     @class_virtualizer = VirtualKeywords::Virtualizer.new(
         :for_classes => [AnotherClass]
@@ -177,5 +190,15 @@ describe 'Virtualizer' do
     # AnotherClass shouldn't be modified, it's not a subclass of itself
     @another_class.quux.should eql :right
     @yet_another_class.quux.should eql :if_modified
+  end
+
+  it 'virtualizes "while" on instances' do
+    @virtualizer.virtual_while do |condition, body|
+      # call the body once, regardless of condition
+      body.call      
+    end
+
+    result = @counter.run
+    result.should eql [0]
   end
 end
