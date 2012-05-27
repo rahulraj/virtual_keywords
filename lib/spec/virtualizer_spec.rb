@@ -55,7 +55,7 @@ describe 'install_method_on_class' do
     VirtualKeywords::ClassReflection.install_method_on_class(
         MyClass, 'def foo; $thing = :new; end')
     
-    @object.foo()
+    @object.foo
     $thing.should eql :new
   end
 end
