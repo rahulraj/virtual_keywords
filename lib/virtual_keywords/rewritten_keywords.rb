@@ -144,6 +144,16 @@ module VirtualKeywords
       while_lambda = lambda_or_raise(caller_object, :while)
       while_lambda.call(condition, body)
     end
+
+    # Unlike unless, until IS a node in the AST
+    # (it doesn't turn into while not)
+    # For now, I'm passing this inconsistency through to the client.
+    # A later modification of this gem may fold while and until into one thing
+    # for consistency.
+    def call_until(caller_object, condition, body)
+      until_lambda = lambda_or_raise(caller_object, :until)
+      until_lambda.call(condition, body)
+    end
   end
 
 

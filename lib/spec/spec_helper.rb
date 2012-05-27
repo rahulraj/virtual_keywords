@@ -371,6 +371,25 @@ module TrackWhiles
   end
 end
 
+module TrackUntils
+  @my_until_calls = 0
+
+  def increment_my_until_calls
+    @my_until_calls += 1
+  end
+
+  def my_until
+    @my_until ||= lambda { |condition, body|
+      increment_my_until_calls
+      until condition.call
+        body.call
+      end
+    }
+  end
+end
+
+
+
 class Abstract < StandardError
 end
 

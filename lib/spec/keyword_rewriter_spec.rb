@@ -7,8 +7,8 @@ describe 'KeywordRewriter' do
   end
 
   it 'turns an until into a sexp' do
-    p @until    
-    puts ""
-    p @until_result
+    #p @until    
+    #puts ""
+    #p @until_result
   end  
 end

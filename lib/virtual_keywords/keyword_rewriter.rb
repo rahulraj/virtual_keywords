@@ -148,4 +148,36 @@ module VirtualKeywords
       )
     end
   end
+
+  class UntilRewriter < SexpProcessor
+    def initialize
+      super
+      self.strict = false
+    end
+
+    def rewrite_until(expression)
+      condition = expression[1]
+      body = expression[2]
+      
+      # This was a true in the example I checked (in sexps_while.txt)
+      # but I'm not sure what it's for.
+      third = expression[3]
+      if third != true # Should be true, not just a truthy object
+        raise UnexpectedSexp, 'Expected true as the 3rd element in a while, ' +
+            "but got #{third}, this is probably a bug."
+      end
+
+      s(:call,
+        s(:colon2,
+          s(:const, :VirtualKeywords),
+          :REWRITTEN_KEYWORDS
+        ), :call_until,
+        s(:array,
+          s(:self),
+          s(:iter, s(:fcall, :lambda), nil, condition),
+          s(:iter, s(:fcall, :lambda), nil, body)
+        )
+      )
+    end
+  end
 end
