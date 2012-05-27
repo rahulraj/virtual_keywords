@@ -43,14 +43,10 @@ end
 module TrackIfs
   @my_if_calls = 0 # Don't forget to reset this before each spec!
 
-  def increment_my_if_calls
-    @my_if_calls += 1
-  end
-
   def my_if
     # Dummy if that increments @my_if_calls, then runs as normal
     @my_if ||= lambda { |condition, then_do, else_do|
-      increment_my_if_calls
+      @my_if_calls += 1
       if condition.call 
         then_do.call
       else 
@@ -63,14 +59,10 @@ end
 module TrackAnds
   @my_and_calls = 0
 
-  def increment_my_and_calls
-    @my_and_calls += 1
-  end
-
   def my_and
     # Dummy if that increments @my_if_calls, then runs as normal
     @my_and ||= lambda { |first, second|
-      increment_my_and_calls
+      @my_and_calls += 1
       first.call and second.call
     }
   end
@@ -79,13 +71,9 @@ end
 module TrackOrs
   @my_or_calls = 0
 
-  def increment_my_or_calls
-    @my_or_calls += 1
-  end
-
   def my_or
     @my_or ||= lambda { |first, second|
-      increment_my_or_calls
+      @my_or_calls += 1
       first.call or second.call
     }
   end
@@ -94,13 +82,9 @@ end
 module TrackWhiles
   @my_while_calls = 0
 
-  def increment_my_while_calls
-    @my_while_calls += 1
-  end
-
   def my_while
     @my_while ||= lambda { |condition, body|
-      increment_my_while_calls
+      @my_while_calls += 1
       while condition.call
         body.call
       end
@@ -111,21 +95,15 @@ end
 module TrackUntils
   @my_until_calls = 0
 
-  def increment_my_until_calls
-    @my_until_calls += 1
-  end
-
   def my_until
     @my_until ||= lambda { |condition, body|
-      increment_my_until_calls
+      @my_until_calls += 1
       until condition.call
         body.call
       end
     }
   end
 end
-
-
 
 class Abstract < StandardError
 end
@@ -139,10 +117,10 @@ module DoRewrite
 
   def do_rewrite(method_name, object, verbose = false)
     sexp = @methods[method_name]
-    result = sexp
-    rewriters.each do |rewriter|
-      result = rewriter.process result 
-    end
+    # Run all rewriters on the sexp
+    result = rewriters.reduce(sexp) { |rewritee, rewriter|
+      rewriter.process rewritee
+    }
     stringifier = VirtualKeywords::SexpStringifier.new
 
     # Visually inspecting this result, it appears to be right
