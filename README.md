@@ -3,8 +3,8 @@ Virtual Keywords
 
 virtual\_keywords extends the Ruby language, making it possible to override keywords
 like "if", "and", and "or" with your own implementations. It uses ParseTree to
-inspect Ruby code, and replaces calls to these keywords with calls to blocks
-you define.
+inspect Ruby code, and replaces expressions using these keywords with calls
+to blocks you define.
 
 Motivation
 ----------
