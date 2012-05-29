@@ -1,7 +1,7 @@
 Virtual Keywords
 ================
 
-This library extends the Ruby language, making it possible to override keywords
+virtual\_keywords extends the Ruby language, making it possible to override keywords
 like "if", "and", and "or" with your own implementations. It uses ParseTree to
 inspect Ruby code, and replaces calls to these keywords with calls to blocks
 you define.
@@ -20,13 +20,13 @@ just reopen the Object class and add a should method!
 This flexibility has its limits. Look at "if" statements:
 ```ruby
 if condition
-  do_something()
+  do_something
 else
-  do_something_else()
+  do_something_else
 end
 ```
 There isn't an out-of-the-box way to override this. Ruby will evaluate
-condition, then evaluate either do_something() or do_something_else() depending
+condition, then evaluate either do_something or do_something_else depending
 on whether condition was true, and you can't redefine this behavior.
 
 Smalltalk, Clojure, Scala, and a handful of other languages don't have this
@@ -34,7 +34,7 @@ issue, so this limitation makes Ruby feel more cumbersome by comparison.
 
 virtual_keywords brings this flexibility to Ruby, completing the idea of an
 extensible language with rich syntax. Currently, users can override "if",
-"and", and "or", and more is on the way!
+"and", "or", "not", "while", and "until" and more is on the way!
 
 Usage
 -----
@@ -65,7 +65,8 @@ objects created through their subclasses virtualized.
 
 Finally, provide alternate implementations of the keywords you want to replace.
 You can replace as many or as few of the keywords as you want.
-To rewrite "if" conditionals, write:
+To rewrite "if" conditionals, call the virtual_if method, and pass in a block
+containing your modified implementation of "if" conditionals. For example:
 ```ruby
 virtualizer.virtual_if do |condition, then_do, else_do|
   # condition, then_do, and else_do are lambdas wrapping the condition of the
@@ -87,6 +88,9 @@ virtualizer.virtual_if do |condition, then_do, else_do|
   # ...
 end
 ```
+The Virtualizer object will respond to this method call by rewriting all "if"
+expressions in the objects specified in the constructor to call your block.
+
 "and" and "or" take two parameters, instead of three. You'd rewrite them like
 this:
 ```ruby
@@ -97,6 +101,11 @@ end
 ```
 "or" is virtualized using virtualizer.virtual_or, which is similar
 to virtual_and.
+
+The block passed to virtual_not takes one parameter (a lambda wrapping the
+object whose boolean value would normally be inverted).
+virtual_while and virtual_until's blocks take two parameters: the first is the
+condition and the second is the body of the loop (wrapped in lambdas).
 
 You can of course create multiple Virtualizer objects, each operating on
 different objects or classes, if you want to use different implementations of
