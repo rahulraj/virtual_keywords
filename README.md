@@ -1,10 +1,10 @@
 Virtual Keywords
 ================
 
-virtual\_keywords extends the Ruby language, making it possible to override keywords
-like "if", "and", and "or" with your own implementations. It uses ParseTree to
-inspect Ruby code, and replaces expressions using these keywords with calls
-to blocks you define.
+virtual\_keywords extends the Ruby language, making it possible to override
+keywords like "if", "and", and "or" with your own implementations. It uses
+ParseTree and ruby\_parser to inspect Ruby code, and replaces expressions
+using these keywords with calls to blocks you define.
 
 Motivation
 ----------
@@ -110,3 +110,12 @@ condition and the second is the body of the loop (wrapped in lambdas).
 You can of course create multiple Virtualizer objects, each operating on
 different objects or classes, if you want to use different implementations of
 the keywords for each class.
+
+Ruby Version Compatibility
+--------------------------
+virtual_keywords has been tested on Rubies 1.8.7 and 1.9.3. ParseTree
+doesn't work in Ruby 1.9, so virtual_keywords detects the version it's running
+in, and falls back to ruby_parser if necessary. virtual_keywords will work on
+Ruby 1.9, but it can't handle all cases. ruby_parser fails when parsing code
+that uses the new syntax from 1.9 (e.g. the { foo: bar } hash literal form)
+but it can handle code written in Ruby 1.9 that doesn't use new syntax.
