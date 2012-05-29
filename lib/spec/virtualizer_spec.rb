@@ -8,6 +8,7 @@ describe 'ClassReflection' do
       end
     end
     @object = MyClass.new
+    @object2 = MyClass.new
 
     @reflection = VirtualKeywords::ClassReflection.new
   end
@@ -53,23 +54,11 @@ describe 'ClassReflection' do
     @object.foo
     $thing.should eql :new
   end
-end
-
-describe 'install_method_on_instance' do
-  before :each do
-    class MyClass
-      def foo
-        :hello
-      end
-    end
-    @object1 = MyClass.new
-    @object2 = MyClass.new
-  end
 
   it 'installs methods on specific instances' do
-    VirtualKeywords::ClassReflection.install_method_on_instance(
-        @object1, 'def foo; :goodbye; end')
-    @object1.foo.should eql :goodbye
+    @reflection.install_method_on_instance(
+        @object, 'def foo; :goodbye; end')
+    @object.foo.should eql :goodbye
     @object2.foo.should eql :hello
   end
 end

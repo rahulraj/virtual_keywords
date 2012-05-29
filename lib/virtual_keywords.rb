@@ -1,6 +1,8 @@
 require 'parse_tree'
 require 'ruby2ruby'
 
+require 'virtual_keywords/deep_copy_array'
+require 'virtual_keywords/parser_strategy'
 require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/class_mirrorer'
 require 'virtual_keywords/class_reflection'

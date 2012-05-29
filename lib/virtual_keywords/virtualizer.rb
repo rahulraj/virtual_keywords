@@ -1,17 +1,5 @@
 # Parent module containing all variables defined as part of virtual_keywords
 module VirtualKeywords
-
-  # Deeply copy an array.
-  #
-  # Arguments:
-  #   array: (Array[A]) the array to copy. A is any arbitrary type.
-  #
-  # Returns:
-  #   (Array[A]) a deep copy of the original array.
-  def self.deep_copy_array(array)
-    Marshal.load(Marshal.dump(array))
-  end
-
   # Object that virtualizes keywords.
   class Virtualizer
     # Initialize a Virtualizer
@@ -45,9 +33,6 @@ module VirtualKeywords
     #   until_rewriter: (UntilRewriter) the SexpProcessor descendant that
     #       rewrites "until"s in methods (optional, the default is
     #       UntilRewriter.new).
-    #   sexp_processor: (SexpProcessor) the sexp_processor that can turn
-    #       ParseTree results into sexps (optional, the default is
-    #       SexpProcessor.new).
     #   sexp_stringifier: (SexpStringifier) an object that can turn sexps
     #       back into Ruby code (optional, the default is
     #       SexpStringifier.new).
@@ -65,25 +50,22 @@ module VirtualKeywords
       @not_rewriter = input_hash[:or_rewriter] || NotRewriter.new
       @while_rewriter = input_hash[:while_rewriter] || WhileRewriter.new
       @until_rewriter = input_hash[:until_rewriter] || UntilRewriter.new
-      @sexp_processor = input_hash[:sexp_processor] || SexpProcessor.new
       @sexp_stringifier = input_hash[:sexp_stringifier] || SexpStringifier.new
       @rewritten_keywords =
           input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
-      @class_reflection = input_hash[:class_reflection] || ClassReflection
+      @class_reflection = input_hash[:class_reflection] || ClassReflection.new
     end
 
     # Helper method to rewrite code.
     #
     # Arguments:
-    #   translated: (Array) the output of ParseTree.translate on the original
-    #       code
+    #   translated: (Sexp) the sexp for code
     #   rewriter: (SexpProcessor) the object that will rewrite the sexp, to
     #       virtualize the keywords.
-    def rewritten_code(translated, rewriter)
-      sexp = @sexp_processor.process(
-          VirtualKeywords.deep_copy_array(translated))
+    def rewritten_code(sexp, rewriter)
+      sexp_copy = VirtualKeywords.deep_copy_array sexp
       new_code = @sexp_stringifier.stringify(
-          rewriter.process(sexp))
+          rewriter.process(sexp_copy))
     end
 
     # Helper method to rewrite all methods of an object.
@@ -97,8 +79,8 @@ module VirtualKeywords
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
       methods = @class_reflection.instance_methods_of instance.class
-      methods.each do |name, translated|
-        new_code = rewritten_code(translated, rewriter)
+      methods.each do |name, sexp|
+        new_code = rewritten_code(sexp, rewriter)
         @class_reflection.install_method_on_instance(instance, new_code)
       end
     end
@@ -114,8 +96,8 @@ module VirtualKeywords
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)
 
       methods = @class_reflection.instance_methods_of klass
-      methods.each do |name, translated|
-        new_code = rewritten_code(translated, rewriter)
+      methods.each do |name, sexp|
+        new_code = rewritten_code(sexp, rewriter)
         @class_reflection.install_method_on_class(klass, new_code)
       end
     end

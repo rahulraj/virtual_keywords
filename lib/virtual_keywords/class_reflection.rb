@@ -1,7 +1,11 @@
 module VirtualKeywords
-  # Utility functions used to inspect the class hierarchy, and to view
+  # Object used to inspect the class hierarchy, and to view
   # and modify methods of classes.
   class ClassReflection
+    def initialize(parser_strategy = ParserStrategy.new)
+      @parser_strategy = parser_strategy
+    end
+
     # Get the subclasses of a given class.
     #
     # Arguments:
@@ -41,7 +45,7 @@ module VirtualKeywords
     def instance_methods_of(klass)
       methods = {}
       klass.instance_methods(false).each do |method_name|
-        translated = ParseTree.translate(klass, method_name)
+        translated = @parser_strategy.translate_instance_method(klass, method_name)
         methods[method_name] = translated
       end
 
