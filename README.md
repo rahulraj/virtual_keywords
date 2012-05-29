@@ -116,6 +116,8 @@ Ruby Version Compatibility
 virtual_keywords has been tested on Rubies 1.8.7 and 1.9.3. ParseTree
 doesn't work in Ruby 1.9, so virtual_keywords detects the version it's running
 in, and falls back to ruby_parser if necessary. virtual_keywords will work on
-Ruby 1.9, but it can't handle all cases. ruby_parser fails when parsing code
+Ruby 1.9, but it can't handle all cases.
+
+In particular, ruby_parser fails when parsing code
 that uses the new syntax from 1.9 (e.g. the { foo: bar } hash literal form)
 but it can handle code written in Ruby 1.9 that doesn't use new syntax.
