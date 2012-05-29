@@ -1,12 +1,4 @@
-require 'sexp_processor'
-require 'parse_tree'
-require 'ruby2ruby'
-
-require 'virtual_keywords/sexp_stringifier'
-require 'virtual_keywords/class_mirrorer'
-require 'virtual_keywords/virtualizer'
-require 'virtual_keywords/keyword_rewriter'
-require 'virtual_keywords/rewritten_keywords'
+require 'virtual_keywords'
 
 # Classes containing code that will be rewritten
 # They act as test data for this gem.
