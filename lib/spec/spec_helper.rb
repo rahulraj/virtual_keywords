@@ -19,7 +19,7 @@ require 'rspec'
 
 # Given a class and a method name, return a sexpified method.
 def method_to_sexp(klass, method)
-  SexpProcessor.new.process(ParseTree.translate(klass, method))
+  VirtualKeywords::ParserStrategy.new.translate_instance_method(klass, method)
 end
 
 # Sexpify all non-inherited instance methods of a class and return them in
