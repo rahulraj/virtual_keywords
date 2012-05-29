@@ -1,6 +1,3 @@
-require 'parse_tree'
-require 'ruby2ruby'
-
 module VirtualKeywords
 
   # Class that turns a sexp back into a string of Ruby code.
