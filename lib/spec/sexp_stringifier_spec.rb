@@ -1,8 +1,8 @@
-describe 'ParseTreeSexpStringifier' do
+describe 'SexpStringifier' do
   before :each do
     @stub_unifier = double 'Unifier'
     @stub_ruby2ruby = double 'Ruby2Ruby'
-    @stringifier = VirtualKeywords::ParseTreeSexpStringifier.new(
+    @stringifier = VirtualKeywords::SexpStringifier.new(
         @stub_unifier, @stub_ruby2ruby)
   end
 

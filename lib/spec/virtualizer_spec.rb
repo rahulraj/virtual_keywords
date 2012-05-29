@@ -15,7 +15,7 @@ describe 'ClassReflection' do
 
   it 'retrieves the instance methods of a class' do
     method_names = @reflection.instance_methods_of(Fizzbuzzer).keys
-    method_names.should include 'fizzbuzz'
+    method_names.should include :fizzbuzz
   end
 
   it 'finds the subclasses of classes and flattens the result' do

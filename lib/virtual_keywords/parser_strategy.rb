@@ -3,7 +3,11 @@ module VirtualKeywords
     # Factory method
     # Create the appropriate strategy object for the current Ruby version.
     def self.new
-      ParseTreeStrategy.new(ParseTree, SexpProcessor.new)
+      if RUBY_VERSION.start_with? '1.8'
+        ParseTreeStrategy.new(ParseTree, SexpProcessor.new)
+      else
+        RubyParserStrategy.new(RubyParser.new)
+      end
     end
   end
   # One problem that needs to be solved is that of converting source code form
@@ -21,6 +25,16 @@ module VirtualKeywords
 
     def translate_instance_method(klass, method_name)
       @sexp_processor.process(@parse_tree.translate(klass, method_name))
+    end
+  end
+
+  class RubyParserStrategy
+    def initialize ruby_parser
+      @ruby_parser = ruby_parser
+    end
+
+    def translate_instance_method(klass, method_name)
+      @ruby_parser.parse(klass.instance_method(method_name).source)
     end
   end
 end

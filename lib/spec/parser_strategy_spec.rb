@@ -1,12 +1,5 @@
 require 'spec_helper'
 
-describe 'ParserStrategy' do
-  it 'produces an appropriate strategy object in the factory' do
-    VirtualKeywords::ParserStrategy.new.should be_a(
-        VirtualKeywords::ParseTreeStrategy)
-  end
-end
-
 describe 'ParseTreeStrategy' do
   before :each do
     @parse_tree = double 'ParseTree'

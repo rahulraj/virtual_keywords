@@ -1,4 +1,8 @@
-require 'virtual_keywords'
+if RUBY_VERSION.start_with? '1.8'
+  require 'virtual_keywords'
+else
+  require_relative '../virtual_keywords'
+end
 
 # Classes containing code that will be rewritten
 # They act as test data for this gem.
@@ -137,7 +141,8 @@ module DoRewrite
     # old and new code should produce the same result,
     # except that @my_*_calls is incremented
     old_result = object.send method_name
-    VirtualKeywords::ClassReflection.install_method_on_instance(object, code_result)
+    VirtualKeywords::ClassReflection.new.install_method_on_instance(
+        object, code_result)
     new_result = object.send method_name
 
     new_result.should eql old_result
