@@ -1,7 +1,7 @@
 describe 'SexpStringifier' do
   before :each do
-    @stub_unifier = double 'unifier'
-    @stub_ruby2ruby = double 'ruby2ruby'
+    @stub_unifier = double 'Unifier'
+    @stub_ruby2ruby = double 'Ruby2Ruby'
     @stringifier = VirtualKeywords::SexpStringifier.new(
         @stub_unifier, @stub_ruby2ruby)
   end
