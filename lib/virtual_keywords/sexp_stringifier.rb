@@ -1,8 +1,4 @@
 module VirtualKeywords
-  # Similar to ParserStrategy, we need to run slightly different code
-  # based on the Ruby version.
-  # When using ParseTree, we need to use a Unifier, but we don't need
-  # one when using ruby_parser
   # Class that turns a sexp back into a string of Ruby code.
   class SexpStringifier
     # Initialize the SexpStringifier
