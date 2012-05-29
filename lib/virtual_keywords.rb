@@ -1,4 +1,8 @@
-require 'parse_tree'
+begin
+  require 'parse_tree'
+rescue LoadError
+  require 'ruby_parser'
+end
 require 'ruby2ruby'
 
 require 'virtual_keywords/deep_copy_array'
