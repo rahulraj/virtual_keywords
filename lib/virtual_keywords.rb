@@ -3,6 +3,7 @@ require 'ruby2ruby'
 
 require 'virtual_keywords/sexp_stringifier'
 require 'virtual_keywords/class_mirrorer'
+require 'virtual_keywords/class_reflection'
 require 'virtual_keywords/virtualizer'
 require 'virtual_keywords/keyword_rewriter'
 require 'virtual_keywords/rewritten_keywords'

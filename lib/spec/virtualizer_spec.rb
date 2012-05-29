@@ -1,25 +1,6 @@
 require 'spec_helper'
 
-describe 'instance_methods_of' do
-  it 'retrieves the instance methods of a class' do
-    method_names = VirtualKeywords::ClassReflection.instance_methods_of(
-        Fizzbuzzer).keys
-    method_names.should include 'fizzbuzz'
-  end
-end
-
-describe 'subclasses_of_classes' do
-  it 'finds the subclasses of classes and flattens the result' do
-    rails_classes = [ActiveRecord::Base, ApplicationController]
-    subclasses = VirtualKeywords::ClassReflection.
-        subclasses_of_classes rails_classes
-
-    subclasses.should include Fizzbuzzer
-    subclasses.should include Greeter
-  end
-end
-
-describe 'install_method_on_class' do
+describe 'ClassReflection' do
   before :each do
     class MyClass
       def foo
@@ -27,11 +8,25 @@ describe 'install_method_on_class' do
       end
     end
     @object = MyClass.new
+
+    @reflection = VirtualKeywords::ClassReflection.new
   end
-  
+
+  it 'retrieves the instance methods of a class' do
+    method_names = @reflection.instance_methods_of(Fizzbuzzer).keys
+    method_names.should include 'fizzbuzz'
+  end
+
+  it 'finds the subclasses of classes and flattens the result' do
+    rails_classes = [ActiveRecord::Base, ApplicationController]
+    subclasses = @reflection.subclasses_of_classes rails_classes
+
+    subclasses.should include Fizzbuzzer
+    subclasses.should include Greeter
+  end
+
   it 'installs methods on classes' do
-    VirtualKeywords::ClassReflection.install_method_on_class(
-        MyClass, 'def foo; :goodbye; end')
+    @reflection.install_method_on_class(MyClass, 'def foo; :goodbye; end')
     @object.foo.should eql :goodbye
   end
 
@@ -41,9 +36,9 @@ describe 'install_method_on_class' do
         :hello
       end
     end
-    VirtualKeywords::ClassReflection.install_method_on_class(
+    @reflection.install_method_on_class(
         MyClass, 'def foo; @bar = :bar; :goodbye; end')
-    VirtualKeywords::ClassReflection.install_method_on_class(
+    @reflection.install_method_on_class(
         MyClass, 'def bar; @bar; end')
 
     @object.foo.should eql :goodbye
@@ -52,7 +47,7 @@ describe 'install_method_on_class' do
 
   it 'installs methods that mutate globals' do
     $thing = :old
-    VirtualKeywords::ClassReflection.install_method_on_class(
+    @reflection.install_method_on_class(
         MyClass, 'def foo; $thing = :new; end')
     
     @object.foo
