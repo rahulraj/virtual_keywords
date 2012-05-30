@@ -2,6 +2,10 @@ module VirtualKeywords
   # Object used to inspect the class hierarchy, and to view
   # and modify methods of classes.
   class ClassReflection
+    # Create a new ClassReflection
+    # Arguments:
+    #   parser_strategy: (ParserStrategy) the strategy object to use to parse
+    #       methods. (Optional, the default value is ParserStrategy.new)
     def initialize(parser_strategy = ParserStrategy.new)
       @parser_strategy = parser_strategy
     end
@@ -27,7 +31,7 @@ module VirtualKeywords
     #
     # Returns:
     #   (Array) All classes that are subclasses of one of the classes in klasses,
-    #           in a flattened array.
+    #       in a flattened array.
     def subclasses_of_classes(klasses)
       klasses.map { |klass|
         subclasses_of_class klass

@@ -130,7 +130,7 @@ module VirtualKeywords
       or_lambda.call(first, second)
     end
 
-    # Call a "while" virtual block in place of an "while" expression.
+    # Call a "while" virtual block in place of a "while" expression.
     #
     # Arguments:
     #   caller_object: (Object) the object whose method this is being called in.
@@ -145,16 +145,35 @@ module VirtualKeywords
       while_lambda.call(condition, body)
     end
 
+    # Call an "until" virtual block in place of an "until" expression.
     # Unlike unless, until IS a node in the AST
     # (it doesn't turn into while not)
     # For now, I'm passing this inconsistency through to the client.
     # A later modification of this gem may fold while and until into one thing
     # for consistency.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object whose method this is being called in.
+    #   condition: (Proc) The condition of the until expression.
+    #   body: (Proc) The body of the until expression (which is normally
+    #       executed repeatedly)
+    #   
+    # Raises:
+    #   RewriteLambdaNotProvided if no "until" lambda is available.
     def call_until(caller_object, condition, body)
       until_lambda = lambda_or_raise(caller_object, :until)
       until_lambda.call(condition, body)
     end
 
+    # Call a "not" virtual block in place of a "not" expression.
+    #
+    # Arguments:
+    #   caller_object: (Object) the object whose method this is being called in.
+    #   value: (Proc) The operand of the not operator, which would normally be
+    #       inverted.
+    #   
+    # Raises:
+    #   RewriteLambdaNotProvided if no "not" lambda is available.
     def call_not(caller_object, value)
       not_lambda = lambda_or_raise(caller_object, :not)
       not_lambda.call value

@@ -5,7 +5,7 @@ module VirtualKeywords
     # Initialize a Virtualizer
     # 
     # Arguments:
-    #   A Hash with the following arguments (all optional):
+    #   A Hash with the following key-value pairs (all optional):
     #   for_classes: (Array[Class]) an array of classes. All methods of objects
     #       created from the given classes will be virtualized (optional, the
     #       default is an empty Array).
@@ -150,6 +150,15 @@ module VirtualKeywords
       virtualize_keyword(:or, @or_rewriter, block)
     end
 
+    # Rewrite "not" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "not"s in the objects being
+    #       virtualized
+    def virtual_not(&block)
+      virtualize_keyword(:not, @not_rewriter, block)
+    end
+
     # Rewrite "while" expressions.
     #
     # Arguments:
@@ -159,12 +168,13 @@ module VirtualKeywords
       virtualize_keyword(:while, @while_rewriter, block)
     end
 
+    # Rewrite "until" expressions.
+    #
+    # Arguments:
+    #   &block: The block that will replace "until"s in the objects being
+    #       virtualized
     def virtual_until(&block)
       virtualize_keyword(:until, @until_rewriter, block)
-    end
-
-    def virtual_not(&block)
-      virtualize_keyword(:not, @not_rewriter, block)
     end
   end
 end

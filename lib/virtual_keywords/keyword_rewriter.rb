@@ -114,12 +114,20 @@ module VirtualKeywords
     end
   end
 
+  # SexpProcessor subclass that rewrites "not" expressions.
   class NotRewriter < SexpProcessor
     def initialize
       super
       self.strict = false
     end
 
+    # Rewrite "not" expressions (automatically called by SexpProcessor#process)
+    #
+    # Arguments:
+    #   expression: (Sexp) the :not sexp to rewrite.
+    #
+    # Returns:
+    #   (Sexp): a sexp that instead calls REWRITTEN_KEYWORDS.call_not
     def rewrite_not(expression)
       value = expression[1]
 
@@ -136,15 +144,24 @@ module VirtualKeywords
     end
   end
 
+  # Raised if a rewriter encounters an unexpected sexp, indicating a bug.
   class UnexpectedSexp < StandardError
   end
 
+  # SexpProcessor subclass that rewrites "while" expressions.
   class WhileRewriter < SexpProcessor
     def initialize
       super
       self.strict = false
     end
 
+    # Rewrite "while" expressions (automatically called by SexpProcessor#process)
+    #
+    # Arguments:
+    #   expression: (Sexp) the :while sexp to rewrite.
+    #
+    # Returns:
+    #   (Sexp): a sexp that instead calls REWRITTEN_KEYWORDS.call_while
     def rewrite_while(expression)
       condition = expression[1]
       body = expression[2]
@@ -171,12 +188,20 @@ module VirtualKeywords
     end
   end
 
+  # SexpProcessor subclass that rewrites "until" expressions.
   class UntilRewriter < SexpProcessor
     def initialize
       super
       self.strict = false
     end
 
+    # Rewrite "until" expressions (automatically called by SexpProcessor#process)
+    #
+    # Arguments:
+    #   expression: (Sexp) the :until sexp to rewrite.
+    #
+    # Returns:
+    #   (Sexp): a sexp that instead calls REWRITTEN_KEYWORDS.call_until
     def rewrite_until(expression)
       condition = expression[1]
       body = expression[2]
