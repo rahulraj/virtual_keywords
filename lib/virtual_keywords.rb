@@ -40,6 +40,8 @@ module VirtualKeywords
   end
 
   def self.sanity_test
+    # TODO See if there's a way to run the specs instead of this, when
+    # building the gem and requiring it
     virtualizer = Virtualizer.new(
         :for_classes => [Foo]
     )
