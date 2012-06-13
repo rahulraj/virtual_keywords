@@ -73,4 +73,10 @@ describe 'micro SQL DSL virtualizing' do
     result_sql.should eql 'select (name,post_ids) from users where ' +
         'name="rahul" or name="Rahul Rajagopalan"'
   end
+
+  it 'handles complex SQL' do
+    result_sql = @user.select_complex  
+    result_sql.should eql 'select (name,post_ids) from users where ' +
+        'name="rahul" and not id=5 or name="Rahul Rajagopalan"'
+  end
 end

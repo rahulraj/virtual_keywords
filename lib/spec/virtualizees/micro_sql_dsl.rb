@@ -17,6 +17,14 @@ class Sql
     virtualizer.virtual_or do |first, second|
       "#{first.call} or #{second.call}"
     end
+
+    virtualizer.virtual_and do |first, second|
+      "#{first.call} and #{second.call}" 
+    end
+
+    virtualizer.virtual_not do |value|
+      "not #{value.call}"
+    end
   end
 end
 
@@ -105,6 +113,6 @@ class MicroSqlUser
     right_id = 'id=5'
     is_full_name = 'name="Rahul Rajagopalan"'
     Sql::select [:name, :post_ids], :from => :users if
-        name_is_rahul and right_id or is_full_name
+        name_is_rahul and not right_id or is_full_name
   end
 end
