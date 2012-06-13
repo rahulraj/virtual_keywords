@@ -9,15 +9,12 @@ class Sql
   def self.dslify object
     virtualizer = VirtualKeywords::Virtualizer.new :for_instances => [object]
 
-    puts "virtualizing if"
     virtualizer.virtual_if do |condition, then_do, else_do|
       # In this DSL, all "if"s are postfix and have no else clause.
       "#{then_do.call} where #{condition.call}"
     end
 
-    puts "virtualizing or"
     virtualizer.virtual_or do |first, second|
-      raise StandardError
       "#{first.call} or #{second.call}"
     end
   end
@@ -26,11 +23,11 @@ end
 class MicroSqlUser
   # First version, just using built-in syntatic sugar: optional parentheses
   # and braces around hashes.
-  #def simple_select
-    ## Limitation: the parser can't handle the new hash syntax
-    ## (so here we use the old one)
-    #Sql::select [:name, :post_ids], :from => :users
-  #end
+  def simple_select
+    # Limitation: the parser can't handle the new hash syntax
+    # (so here we use the old one)
+    Sql::select [:name, :post_ids], :from => :users
+  end
 
   # Ok, now mix in some VirtualKeywords!
   # Use postfix "if" to stand in for "where" clauses. It should look
@@ -72,12 +69,12 @@ class MicroSqlUser
   #      lambda { }
   #  )
   # end
-  #def select_with_or
-    #name_is_rahul = 'name="rahul"' 
-    #is_full_name = 'name="Rahul Rajagopalan"'
-    #Sql::select [:name, :post_ids], :from => :users if
-        #name_is_rahul or is_full_name
-  #end
+  def select_with_or
+    name_is_rahul = 'name="rahul"' 
+    is_full_name = 'name="Rahul Rajagopalan"'
+    Sql::select [:name, :post_ids], :from => :users if
+        name_is_rahul or is_full_name
+  end
 
   # Should turn into:
   # def select_complex
@@ -103,11 +100,11 @@ class MicroSqlUser
   #       lambda { }
   #   )
   # end
-  #def select_complex
-    #name_is_rahul = 'name="rahul"' 
-    #right_id = 'id=5'
-    #is_full_name = 'name="Rahul Rajagopalan"'
-    #Sql::select [:name, :post_ids], :from => :users if
-        #name_is_rahul and right_id or is_full_name
-  #end
+  def select_complex
+    name_is_rahul = 'name="rahul"' 
+    right_id = 'id=5'
+    is_full_name = 'name="Rahul Rajagopalan"'
+    Sql::select [:name, :post_ids], :from => :users if
+        name_is_rahul and right_id or is_full_name
+  end
 end
