@@ -1,5 +1,12 @@
 # Parent module containing all variables defined as part of virtual_keywords
 module VirtualKeywords
+
+  class NoSuchInstance < StandardError
+  end
+
+  class NoSuchClass < StandardError
+  end
+
   # Object that virtualizes keywords.
   class Virtualizer
     # Initialize a Virtualizer
@@ -54,6 +61,34 @@ module VirtualKeywords
       @rewritten_keywords =
           input_hash[:rewritten_keywords] || REWRITTEN_KEYWORDS
       @class_reflection = input_hash[:class_reflection] || ClassReflection.new
+      @class_mirrorer = input_hash[:class_mirrorer] || ClassMirrorer.new({})
+
+      @sexps_for_classes = {}
+      @sexps_for_instances = {}
+      # TODO Refactor out work in the constructor
+      # and maybe move the sexp storage elsewhere.
+      parse_all_the_classes
+    end
+
+    def parse_all_the_classes
+      # Well, not _all_, just the ones provided in the constructor..
+      @for_classes.each do |klass|
+        @sexps_for_classes[klass] = @class_mirrorer.mirror klass
+      end
+      @for_instances.each do |instance|
+        @sexps_for_instances[instance] = @class_mirrorer.mirror instance.class
+      end
+      @for_subclasses_of.each do |klass|
+        subclasses = @class_reflection.subclasses_of_class klass
+        subclasses.each do |subclass|
+          @sexps_for_classes[subclass] = @class_mirrorer.mirror subclass
+        end
+      end
+    end
+
+    def rewritten_sexp(sexp, rewriter)
+      sexp_copy = VirtualKeywords.deep_copy_array sexp
+      rewriter.process sexp_copy 
     end
 
     # Helper method to rewrite code.
@@ -78,11 +113,20 @@ module VirtualKeywords
     def rewrite_all_methods_of_instance(instance, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_object(instance, keyword, block)
 
-      methods = @class_reflection.instance_methods_of instance.class
-      methods.each do |name, sexp|
-        new_code = rewritten_code(sexp, rewriter)
-        @class_reflection.install_method_on_instance(instance, new_code)
+      if not @sexps_for_instances.include? instance
+        raise NoSuchInstance, "Tried to rewrite methods of #{instance}," +
+            "but it's not there!"
       end
+      mirror_hash = @sexps_for_instances[instance]
+      new_mirror_hash = {}
+      mirror_hash.each do |class_and_method_name, sexp|
+        new_sexp = rewritten_sexp(sexp, rewriter)
+        new_code = @sexp_stringifier.stringify new_sexp
+        @class_reflection.install_method_on_instance(instance, new_code)
+        # Save the modified sexp for the next go
+        new_mirror_hash[class_and_method_name] = new_sexp
+      end
+      @sexps_for_instances[instance] = new_mirror_hash
     end
 
     # Helper method to rewrite all methods of objects from a class.
@@ -95,11 +139,19 @@ module VirtualKeywords
     def rewrite_all_methods_of_class(klass, keyword, rewriter, block)
       @rewritten_keywords.register_lambda_for_class(klass, keyword, block)
 
-      methods = @class_reflection.instance_methods_of klass
-      methods.each do |name, sexp|
-        new_code = rewritten_code(sexp, rewriter)
-        @class_reflection.install_method_on_class(klass, new_code)
+      if not @sexps_for_classes.include? klass
+        raise NoSuchInstance, "Tried to rewrite methods of #{klass}," +
+            "but it's not there!"
       end
+      mirror_hash = @sexps_for_classes[klass]
+      new_mirror_hash = {}
+      mirror_hash.each do |class_and_method_name, sexp|
+        new_sexp = rewritten_sexp(sexp, rewriter)
+        new_code = @sexp_stringifier.stringify new_sexp
+        @class_reflection.install_method_on_class(klass, new_code)
+        new_mirror_hash[class_and_method_name] = new_sexp
+      end
+      @sexps_for_classes[klass] = new_mirror_hash
     end
 
     # Helper method to virtualize a keyword (rewrite with the given block)

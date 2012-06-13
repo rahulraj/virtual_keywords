@@ -13,6 +13,7 @@ module VirtualKeywords
     end
 
     # Turn a sexp into a string of Ruby code.
+    # Makes a copy first so the inputted sexp is not emptied.
     #
     # Arguments:
     #   sexp: (Sexp) the sexp to be stringified.
@@ -20,7 +21,8 @@ module VirtualKeywords
     # Returns:
     #   (String) Ruby code equivalent to the sexp.
     def stringify sexp
-      @ruby2ruby.process(@unifier.process(sexp))
+      sexp_copy = VirtualKeywords.deep_copy_array sexp
+      @ruby2ruby.process(@unifier.process(sexp_copy))
     end
   end
 end

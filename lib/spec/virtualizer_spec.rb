@@ -164,4 +164,20 @@ describe 'Virtualizer' do
     result = @inverter.run true
     result.should be_true
   end
+
+  it 'virtualizes multiple keywords in the same method' do
+    if_calls = 0
+    and_calls = 0
+    @virtualizer.virtual_if do |condition, then_do, else_do|
+      if_calls += 1
+      if condition.call then then_do.call else else_do.call end
+    end
+    @virtualizer.virtual_and do |first, second|
+      and_calls += 1
+      first.call and second.call
+    end
+    @my_class.foo
+    if_calls.should eql 1
+    and_calls.should eql 1
+  end
 end

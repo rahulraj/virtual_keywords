@@ -16,6 +16,7 @@ require 'virtualizees/operator_user'
 require 'virtualizees/while_user'
 require 'virtualizees/until_user'
 require 'virtualizees/case_when_user'
+require 'virtualizees/micro_sql_dsl'
 
 require 'rspec'
 
@@ -120,10 +121,11 @@ module DoRewrite
   # Override this and return a list of rewriters, in order, so do_rewrite
   # can call them
   def rewriters
-    raise Abstract
+    raise Abstract, 'Must provide rewriters!'
   end
 
-  def do_rewrite(method_name, object, verbose = false)
+  def do_rewrite(method_name, object, verbose = false,
+                 old_and_new_are_same = true)
     sexp = @methods[method_name]
     # Run all rewriters on the sexp
     result = rewriters.reduce(sexp) { |rewritee, rewriter|
@@ -141,11 +143,14 @@ module DoRewrite
     # old and new code should produce the same result,
     # except that @my_*_calls is incremented
     old_result = object.send method_name
-    VirtualKeywords::ClassReflection.new.install_method_on_instance(
-        object, code_result)
+    object.instance_eval code_result
+    #VirtualKeywords::ClassReflection.new.install_method_on_instance(
+         #object, code_result)
     new_result = object.send method_name
 
-    new_result.should eql old_result
+    if old_and_new_are_same
+      new_result.should eql old_result
+    end
   end
 end
 

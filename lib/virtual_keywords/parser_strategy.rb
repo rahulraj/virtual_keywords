@@ -38,6 +38,9 @@ module VirtualKeywords
     # Arguments:
     #   klass: (Class) the class.
     #   method_name: (String) the name of the method to translate.
+    #
+    # Returns:
+    #   (Sexp) the method, turned into a sexp.
     def translate_instance_method(klass, method_name)
       @sexp_processor.process(@parse_tree.translate(klass, method_name))
     end
@@ -54,6 +57,9 @@ module VirtualKeywords
     # Arguments:
     #   klass: (Class) the class.
     #   method_name: (String) the name of the method to translate.
+    #
+    # Returns:
+    #   (Sexp) the method, turned into a sexp.
     def translate_instance_method(klass, method_name)
       @ruby_parser.parse(klass.instance_method(method_name).source)
     end

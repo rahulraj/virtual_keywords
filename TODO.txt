@@ -1,0 +1,11 @@
+BUG:
+
+When trying to run multiple virtual_* passes over a method:
+The first one works fine.
+
+But then the second one tries to use method_source to get the source of the
+method to virtualize. However, method_source gives it the code in the file,
+BEFORE it was modified by the first virtual_*, producing wrong results.
+
+To fix this, after each pass with a virtual_*, save a copy of the modified sexp
+and use that as the starting point for the next go.
